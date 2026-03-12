@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="LSB和MSB的概念 LSB ： Least siginificant bit&#x2F;byte; 最低有效位（字节）  MSB ： Most siginificant bit&#x2F;byte: 最高有效位（字节）  FPGA中的应用体现在移位上，假设shift_reg为一个8位寄存器   如果是LSB优先传输（右移的逻辑）：shift_reg &lt;&#x3D; &#123;shift_reg[6">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LSB和MSB的概念">
+<meta property="og:url" content="https://lumosmax7.github.io/2025/04/04/2025-04-04-07-32-38/index.html">
+<meta property="og:site_name" content="Lumosmax7">
+<meta property="og:description" content="LSB和MSB的概念 LSB ： Least siginificant bit&#x2F;byte; 最低有效位（字节）  MSB ： Most siginificant bit&#x2F;byte: 最高有效位（字节）  FPGA中的应用体现在移位上，假设shift_reg为一个8位寄存器   如果是LSB优先传输（右移的逻辑）：shift_reg &lt;&#x3D; &#123;shift_reg[6">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-04-04T07:32:44.000Z">
+<meta property="article:modified_time" content="2025-05-16T03:23:05.000Z">
+<meta property="article:author" content="Leo">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>LSB和MSB的概念</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/lumosmax7">Projects</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2025/04/04/2025-04-04-07-33-26/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2025/01/26/2025-01-26-06-38-13/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://lumosmax7.github.io/2025/04/04/2025-04-04-07-32-38/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://lumosmax7.github.io/2025/04/04/2025-04-04-07-32-38/&text=LSB和MSB的概念"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://lumosmax7.github.io/2025/04/04/2025-04-04-07-32-38/&title=LSB和MSB的概念"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lumosmax7.github.io/2025/04/04/2025-04-04-07-32-38/&is_video=false&description=LSB和MSB的概念"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=LSB和MSB的概念&body=Check out this article: https://lumosmax7.github.io/2025/04/04/2025-04-04-07-32-38/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://lumosmax7.github.io/2025/04/04/2025-04-04-07-32-38/&title=LSB和MSB的概念"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://lumosmax7.github.io/2025/04/04/2025-04-04-07-32-38/&title=LSB和MSB的概念"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://lumosmax7.github.io/2025/04/04/2025-04-04-07-32-38/&title=LSB和MSB的概念"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://lumosmax7.github.io/2025/04/04/2025-04-04-07-32-38/&title=LSB和MSB的概念"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://lumosmax7.github.io/2025/04/04/2025-04-04-07-32-38/&name=LSB和MSB的概念&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://lumosmax7.github.io/2025/04/04/2025-04-04-07-32-38/&t=LSB和MSB的概念"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#LSB%E5%92%8CMSB%E7%9A%84%E6%A6%82%E5%BF%B5"><span class="toc-number">1.</span> <span class="toc-text">LSB和MSB的概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#FPGA%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8"><span class="toc-number">2.</span> <span class="toc-text">FPGA中的应用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8A%E4%BD%8D%E6%9C%BA%E7%9A%84%E5%BA%94%E7%94%A8"><span class="toc-number">3.</span> <span class="toc-text">上位机的应用</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        LSB和MSB的概念
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">Leo</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-04-04T07:32:44.000Z" class="dt-published" itemprop="datePublished">2025-04-04</time>
+        
+      
+    </div>
+
+
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="LSB和MSB的概念"><a href="#LSB和MSB的概念" class="headerlink" title="LSB和MSB的概念"></a><code>LSB</code>和<code>MSB</code>的概念</h2><ul>
+<li><code>LSB</code> ： Least siginificant bit&#x2F;byte; 最低有效位（字节） </li>
+<li><code>MSB</code> ： Most siginificant bit&#x2F;byte: 最高有效位（字节）</li>
+</ul>
+<h2 id="FPGA中的应用"><a href="#FPGA中的应用" class="headerlink" title="FPGA中的应用"></a>FPGA中的应用</h2><p>体现在移位上，假设<code>shift_reg</code>为一个8位寄存器 </p>
+<ul>
+<li>如果是<code>LSB</code>优先传输（右移的逻辑）：<code>shift_reg &lt;= &#123;shift_reg[6:0], mosi&#125;;</code> </li>
+<li>如果是<code>MSB</code>优先传输（左移的逻辑）：<code>shift_reg &lt;= &#123;mosi, shift_reg[7:1]&#125;;</code></li>
+</ul>
+<h2 id="上位机的应用"><a href="#上位机的应用" class="headerlink" title="上位机的应用"></a>上位机的应用</h2><p>上位机称为大端（（Big-Endian）&#x2F;小端（Little-Endian），其中小端模式对应<code>LSB</code>，即低字节在前。 </p>
+<blockquote>
+<p>低字节在前 是指多字节数据中，最低有效字节（Least Significant Byte, LSB） 存储在低地址（或先传输），而 最高有效字节（Most Significant Byte, MSB） 存储在高地址（或后传输）。 </p>
+</blockquote>
+<p>假设一个双字节数据<code>0x1234</code>，对应低字节（LSB）为<code>0x34</code>，高字节（MSB）为<code>0x12</code>，如果采用<code>LSB</code>优先传输的模式，则首先传输的数据是<code>0x34</code>,其次是<code>0x12</code>;反过来，如果是<code>MSB</code>优先传输，则是<code>0x12</code>,然后是<code>0x34</code>。 </p>
+<p>上位机在接收和发送数据时，一定要根据实际数据的传输方式对字节顺序进行重新组合。一般来讲都是小端传输，特别是多字节时要进行相应的调整重组</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="http://github.com/lumosmax7">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#LSB%E5%92%8CMSB%E7%9A%84%E6%A6%82%E5%BF%B5"><span class="toc-number">1.</span> <span class="toc-text">LSB和MSB的概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#FPGA%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8"><span class="toc-number">2.</span> <span class="toc-text">FPGA中的应用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8A%E4%BD%8D%E6%9C%BA%E7%9A%84%E5%BA%94%E7%94%A8"><span class="toc-number">3.</span> <span class="toc-text">上位机的应用</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://lumosmax7.github.io/2025/04/04/2025-04-04-07-32-38/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://lumosmax7.github.io/2025/04/04/2025-04-04-07-32-38/&text=LSB和MSB的概念"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://lumosmax7.github.io/2025/04/04/2025-04-04-07-32-38/&title=LSB和MSB的概念"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lumosmax7.github.io/2025/04/04/2025-04-04-07-32-38/&is_video=false&description=LSB和MSB的概念"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=LSB和MSB的概念&body=Check out this article: https://lumosmax7.github.io/2025/04/04/2025-04-04-07-32-38/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://lumosmax7.github.io/2025/04/04/2025-04-04-07-32-38/&title=LSB和MSB的概念"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://lumosmax7.github.io/2025/04/04/2025-04-04-07-32-38/&title=LSB和MSB的概念"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://lumosmax7.github.io/2025/04/04/2025-04-04-07-32-38/&title=LSB和MSB的概念"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://lumosmax7.github.io/2025/04/04/2025-04-04-07-32-38/&title=LSB和MSB的概念"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://lumosmax7.github.io/2025/04/04/2025-04-04-07-32-38/&name=LSB和MSB的概念&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://lumosmax7.github.io/2025/04/04/2025-04-04-07-32-38/&t=LSB和MSB的概念"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2026
+    Leo
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/lumosmax7">Projects</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="LibUSB简介libusb 是一个用户态库，它通过 usbfs（又名 usbdevfs）与内核中的 USB 栈交互，主要依赖 ioctl 机制来实现控制、批量、同步等传输。libusb 最终是通过系统调用 ioctl 与内核中的 &#x2F;dev&#x2F;bus&#x2F;usb 设备节点进行通信其中： 12ioctl(fd, USBDEVFS_SUBMITURB, struct usbdevfs_urb *urb);">
+<meta property="og:type" content="article">
+<meta property="og:title" content="USB Hook 模块 —— Based on LibUSB(Linux)">
+<meta property="og:url" content="https://lumosmax7.github.io/2025/05/16/2025-05-16-03-11-48/index.html">
+<meta property="og:site_name" content="Lumosmax7">
+<meta property="og:description" content="LibUSB简介libusb 是一个用户态库，它通过 usbfs（又名 usbdevfs）与内核中的 USB 栈交互，主要依赖 ioctl 机制来实现控制、批量、同步等传输。libusb 最终是通过系统调用 ioctl 与内核中的 &#x2F;dev&#x2F;bus&#x2F;usb 设备节点进行通信其中： 12ioctl(fd, USBDEVFS_SUBMITURB, struct usbdevfs_urb *urb);">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-05-16T03:12:41.000Z">
+<meta property="article:modified_time" content="2025-05-16T03:22:56.000Z">
+<meta property="article:author" content="Leo">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>USB Hook 模块 —— Based on LibUSB(Linux)</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/lumosmax7">Projects</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2025/08/21/2025-08-21-14-49-04/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2025/05/16/2025-05-16-03-08-22/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://lumosmax7.github.io/2025/05/16/2025-05-16-03-11-48/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://lumosmax7.github.io/2025/05/16/2025-05-16-03-11-48/&text=USB Hook 模块 —— Based on LibUSB(Linux)"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://lumosmax7.github.io/2025/05/16/2025-05-16-03-11-48/&title=USB Hook 模块 —— Based on LibUSB(Linux)"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lumosmax7.github.io/2025/05/16/2025-05-16-03-11-48/&is_video=false&description=USB Hook 模块 —— Based on LibUSB(Linux)"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=USB Hook 模块 —— Based on LibUSB(Linux)&body=Check out this article: https://lumosmax7.github.io/2025/05/16/2025-05-16-03-11-48/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://lumosmax7.github.io/2025/05/16/2025-05-16-03-11-48/&title=USB Hook 模块 —— Based on LibUSB(Linux)"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://lumosmax7.github.io/2025/05/16/2025-05-16-03-11-48/&title=USB Hook 模块 —— Based on LibUSB(Linux)"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://lumosmax7.github.io/2025/05/16/2025-05-16-03-11-48/&title=USB Hook 模块 —— Based on LibUSB(Linux)"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://lumosmax7.github.io/2025/05/16/2025-05-16-03-11-48/&title=USB Hook 模块 —— Based on LibUSB(Linux)"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://lumosmax7.github.io/2025/05/16/2025-05-16-03-11-48/&name=USB Hook 模块 —— Based on LibUSB(Linux)&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://lumosmax7.github.io/2025/05/16/2025-05-16-03-11-48/&t=USB Hook 模块 —— Based on LibUSB(Linux)"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#LibUSB%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text">LibUSB简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Hook%E5%87%BD%E6%95%B0%E6%9E%B6%E6%9E%84"><span class="toc-number">2.</span> <span class="toc-text">Hook函数架构</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        USB Hook 模块 —— Based on LibUSB(Linux)
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">Leo</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-05-16T03:12:41.000Z" class="dt-published" itemprop="datePublished">2025-05-16</time>
+        
+      
+    </div>
+
+
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="LibUSB简介"><a href="#LibUSB简介" class="headerlink" title="LibUSB简介"></a>LibUSB简介</h2><p>libusb 是一个用户态库，它通过 <code>usbfs</code>（又名 <code>usbdevfs</code>）与内核中的 USB 栈交互，主要依赖 <code>ioctl</code> 机制来实现控制、批量、同步等传输。libusb 最终是通过系统调用 <code>ioctl</code> 与内核中的 <code>/dev/bus/usb</code> 设备节点进行通信其中：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">ioctl(fd, USBDEVFS_SUBMITURB, <span class="keyword">struct</span> usbdevfs_urb *urb);</span><br></pre></td></tr></table></figure>
+
+<p>这个调用是 libusb 进行异步传输时最常用的操作，而同步传输（如 <code>libusb_bulk_transfer</code>, <code>libusb_control_transfer</code> 等）也是通过同步的 <code>SUBMITURB + REAPURB</code> 来完成的。</p>
+<p>libusb的调用链层：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">libusb_bulk_transfer / libusb_control_transfer</span><br><span class="line">        ↓</span><br><span class="line">libusb_submit_transfer()</span><br><span class="line">        ↓</span><br><span class="line">op_submit_transfer()   // backend，比如 linux_usbfs_submit_transfer()</span><br><span class="line">        ↓</span><br><span class="line">ioctl(fd, USBDEVFS_SUBMITURB, &amp;urb)</span><br><span class="line">        ↓</span><br><span class="line">内核：usbdev_do_ioctl()</span><br><span class="line">        ↓</span><br><span class="line">内核：usbdevfs_submit_urb()等</span><br><span class="line">        ↓</span><br><span class="line">内核：usb_hcd_submit_urb()</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="Hook函数架构"><a href="#Hook函数架构" class="headerlink" title="Hook函数架构"></a>Hook函数架构</h2><p><code>usbdev_do_ioctl()</code>, 它的路径在<code>drivers/usb/core/devio.c</code>，功能是处理来自用户态的<code>ioctl</code>调用，是所有 USB 传输的总入口。如果想知道上位机通过 libusb 或 usbfs 向外设发送的具体数据内容（例如 <code>control</code>、<code>bulk</code>、<code>interrupt</code> 传输的数据），你需要在 <code>usbdev_do_ioctl</code> 中拦截下特定的 IOCTL 命令，如：</p>
+<ul>
+<li><code>USBDEVFS_CONTROL</code>（控制传输）</li>
+<li><code>USBDEVFS_BULK</code>（批量传输）</li>
+<li><code>USBDEVFS_SUBMITURB</code>（异步传输，核心数据封装在 URB 中）</li>
+</ul>
+<p>可以通过hook 判断 <code>cmd</code> 类型，并从用户态通过 <code>arg</code> 拷贝出传输数据，架构如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">模块加载:</span><br><span class="line">  └─ 查找 usbdev_do_ioctl 的地址（通过 kallsyms）</span><br><span class="line">  └─ 用 ftrace 设置 hook：每次用户调用 usbdev_do_ioctl，转而调用我们的 handler</span><br><span class="line"></span><br><span class="line">hook_handler(regs):</span><br><span class="line">  └─ 获取 IOCTL 参数:</span><br><span class="line">        - file</span><br><span class="line">        - cmd</span><br><span class="line">        - arg（指向结构体）</span><br><span class="line"></span><br><span class="line">  └─ 判断传输类型:</span><br><span class="line">      ├─ if cmd == USBDEVFS_CONTROL:</span><br><span class="line">      │     └─ 从用户空间 copy ctrltransfer 结构体</span><br><span class="line">      │     └─ 判断是写方向 (OUT)</span><br><span class="line">      │     └─ 打印传输方向 + 数据内容</span><br><span class="line">      │</span><br><span class="line">      ├─ elif cmd == USBDEVFS_BULK:</span><br><span class="line">      │     └─ copy bulktransfer 结构体</span><br><span class="line">      │     └─ 如果是 OUT（ep &amp; 0x80 == 0）</span><br><span class="line">      │     └─ 打印 endpoint 和数据内容</span><br><span class="line">      │</span><br><span class="line">      └─ elif cmd == USBDEVFS_SUBMITURB:</span><br><span class="line">            └─ copy urb 结构体</span><br><span class="line">            └─ 判断 type（控制/批量/中断）</span><br><span class="line">            └─ 如果是 OUT，打印 endpoint 和 buffer 数据</span><br><span class="line"></span><br><span class="line">模块卸载:</span><br><span class="line">  └─ 取消 hook，恢复原始函数</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>Tips: 关于同步传输和异步传输的说明</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>描述</th>
+<th>使用的 IOCTL 命令</th>
+<th align="center">底层数据结构</th>
+<th>调用后行为</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><em>同步传输（阻塞）</em></td>
+<td>用户态程序调用 <code>libusb_bulk_transfer()</code>、<code>libusb_control_transfer()</code> 这类接口时，<strong>会阻塞等待传输完成</strong>，直到内核返回结果。</td>
+<td><code>USBDEVFS_BULK</code>, <code>USBDEVFS_CONTROL</code>, <code>USBDEVFS_INTERRUPT</code></td>
+<td align="center"><code>usbdevfs_bulktransfer</code>, <code>usbdevfs_ctrltransfer</code> 等</td>
+<td>调用时阻塞直到完成</td>
+</tr>
+<tr>
+<td><em>异步传输（非阻塞）</em></td>
+<td>用户态程序使用 <code>libusb_submit_transfer()</code> 提交一个异步任务（URB），<strong>不会等待传输完成</strong>，而是由内核在完成后发出通知（通过回调或 poll）。</td>
+<td><code>USBDEVFS_SUBMITURB</code>, <code>USBDEVFS_DISCARDURB</code></td>
+<td align="center"><code>usbdevfs_urb</code></td>
+<td>立即返回，不阻塞，内核异步完成后再通知</td>
+</tr>
+</tbody></table>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="http://github.com/lumosmax7">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#LibUSB%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text">LibUSB简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Hook%E5%87%BD%E6%95%B0%E6%9E%B6%E6%9E%84"><span class="toc-number">2.</span> <span class="toc-text">Hook函数架构</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://lumosmax7.github.io/2025/05/16/2025-05-16-03-11-48/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://lumosmax7.github.io/2025/05/16/2025-05-16-03-11-48/&text=USB Hook 模块 —— Based on LibUSB(Linux)"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://lumosmax7.github.io/2025/05/16/2025-05-16-03-11-48/&title=USB Hook 模块 —— Based on LibUSB(Linux)"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lumosmax7.github.io/2025/05/16/2025-05-16-03-11-48/&is_video=false&description=USB Hook 模块 —— Based on LibUSB(Linux)"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=USB Hook 模块 —— Based on LibUSB(Linux)&body=Check out this article: https://lumosmax7.github.io/2025/05/16/2025-05-16-03-11-48/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://lumosmax7.github.io/2025/05/16/2025-05-16-03-11-48/&title=USB Hook 模块 —— Based on LibUSB(Linux)"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://lumosmax7.github.io/2025/05/16/2025-05-16-03-11-48/&title=USB Hook 模块 —— Based on LibUSB(Linux)"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://lumosmax7.github.io/2025/05/16/2025-05-16-03-11-48/&title=USB Hook 模块 —— Based on LibUSB(Linux)"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://lumosmax7.github.io/2025/05/16/2025-05-16-03-11-48/&title=USB Hook 模块 —— Based on LibUSB(Linux)"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://lumosmax7.github.io/2025/05/16/2025-05-16-03-11-48/&name=USB Hook 模块 —— Based on LibUSB(Linux)&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://lumosmax7.github.io/2025/05/16/2025-05-16-03-11-48/&t=USB Hook 模块 —— Based on LibUSB(Linux)"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2026
+    Leo
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/lumosmax7">Projects</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

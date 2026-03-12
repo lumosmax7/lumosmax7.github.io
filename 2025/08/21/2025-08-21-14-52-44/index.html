@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="习题 父子进程虽然都执行“同样”的代码，但是在不同的进程中执行，执行一次fork()则会复制一次当前的程序，两个程序同步运行下去；  代码执行情况   1234567891011121314父进程    - 生成子进程1    - 打印B    - 生成子进程2    - 打印C子进程1    - 打印A    - 打印B    - 生成子进程3    - 打印C子进程2    - 打印C子进程3">
+<meta property="og:type" content="article">
+<meta property="og:title" content="操作系统原理、实现与实践（二）">
+<meta property="og:url" content="https://lumosmax7.github.io/2025/08/21/2025-08-21-14-52-44/index.html">
+<meta property="og:site_name" content="Lumosmax7">
+<meta property="og:description" content="习题 父子进程虽然都执行“同样”的代码，但是在不同的进程中执行，执行一次fork()则会复制一次当前的程序，两个程序同步运行下去；  代码执行情况   1234567891011121314父进程    - 生成子进程1    - 打印B    - 生成子进程2    - 打印C子进程1    - 打印A    - 打印B    - 生成子进程3    - 打印C子进程2    - 打印C子进程3">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/lumosmax7/PicImage/main/202508212232334.png">
+<meta property="article:published_time" content="2025-08-21T14:52:45.000Z">
+<meta property="article:modified_time" content="2025-08-21T14:55:56.000Z">
+<meta property="article:author" content="Leo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/lumosmax7/PicImage/main/202508212232334.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>操作系统原理、实现与实践（二）</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/lumosmax7">Projects</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2025/12/27/2025-12-27-17-19-55/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2025/08/21/2025-08-21-14-49-04/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://lumosmax7.github.io/2025/08/21/2025-08-21-14-52-44/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://lumosmax7.github.io/2025/08/21/2025-08-21-14-52-44/&text=操作系统原理、实现与实践（二）"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://lumosmax7.github.io/2025/08/21/2025-08-21-14-52-44/&title=操作系统原理、实现与实践（二）"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lumosmax7.github.io/2025/08/21/2025-08-21-14-52-44/&is_video=false&description=操作系统原理、实现与实践（二）"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=操作系统原理、实现与实践（二）&body=Check out this article: https://lumosmax7.github.io/2025/08/21/2025-08-21-14-52-44/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://lumosmax7.github.io/2025/08/21/2025-08-21-14-52-44/&title=操作系统原理、实现与实践（二）"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://lumosmax7.github.io/2025/08/21/2025-08-21-14-52-44/&title=操作系统原理、实现与实践（二）"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://lumosmax7.github.io/2025/08/21/2025-08-21-14-52-44/&title=操作系统原理、实现与实践（二）"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://lumosmax7.github.io/2025/08/21/2025-08-21-14-52-44/&title=操作系统原理、实现与实践（二）"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://lumosmax7.github.io/2025/08/21/2025-08-21-14-52-44/&name=操作系统原理、实现与实践（二）&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://lumosmax7.github.io/2025/08/21/2025-08-21-14-52-44/&t=操作系统原理、实现与实践（二）"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%A0%E9%A2%98"><span class="toc-number">1.</span> <span class="toc-text">习题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E8%B7%B5"><span class="toc-number">2.</span> <span class="toc-text">实践</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        操作系统原理、实现与实践（二）
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">Leo</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-08-21T14:52:45.000Z" class="dt-published" itemprop="datePublished">2025-08-21</time>
+        
+      
+    </div>
+
+
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="习题"><a href="#习题" class="headerlink" title="习题"></a>习题</h2><ol>
+<li><p>父子进程虽然都执行“同样”的代码，但是在不同的进程中执行，执行一次<code>fork()</code>则会复制一次当前的程序，两个程序同步运行下去；</p>
+</li>
+<li><p>代码执行情况</p>
+</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">父进程</span><br><span class="line">    - 生成子进程1</span><br><span class="line">    - 打印B</span><br><span class="line">    - 生成子进程2</span><br><span class="line">    - 打印C</span><br><span class="line">子进程1</span><br><span class="line">    - 打印A</span><br><span class="line">    - 打印B</span><br><span class="line">    - 生成子进程3</span><br><span class="line">    - 打印C</span><br><span class="line">子进程2</span><br><span class="line">    - 打印C</span><br><span class="line">子进程3</span><br><span class="line">    - 打印C</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li><code>scanf(&quot;ID:%d&quot;,&amp;id)</code>展开成<code>read</code>系统调用是：</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">char buf[MAXLEN];</span><br><span class="line">buf = &quot;ID:&quot;;</span><br><span class="line">write(1,buf,3);</span><br><span class="line">memset(buf,0,sizeof(buf)); </span><br><span class="line">read(1,buf,sizeof(int)); </span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li><code>systemcall3(int,write,int,fd,char*,buf,int,count)</code>展开宏为：</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="type">long</span> _res;</span><br><span class="line">    __asm__ <span class="title function_">volatile</span> <span class="params">(<span class="string">&quot;int $0x80&quot;</span></span></span><br><span class="line"><span class="params">                      : <span class="string">&quot;=a&quot;</span> (_res)</span></span><br><span class="line"><span class="params">                      : <span class="string">&quot;0&quot;</span> (__NR_##name), <span class="string">&quot;b&quot;</span> ((<span class="type">long</span>)(arg1)), <span class="string">&quot;c&quot;</span> ((<span class="type">long</span>)(arg2)), <span class="string">&quot;d&quot;</span> ((<span class="type">long</span>)(arg3)))</span>;</span><br><span class="line">    <span class="keyword">if</span> (_res &gt;= <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">return</span> (type) _res;</span><br><span class="line">    errno = -_res;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="实践"><a href="#实践" class="headerlink" title="实践"></a>实践</h2><ol>
+<li>在<code>include/unistd.h</code>中增加：</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> __NR_iam  72</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __NR_whoami 73</span></span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>在<code>include/linux/sys.h</code>中增加：</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extern</span> <span class="type">int</span> <span class="title function_">sys_iam</span><span class="params">()</span>;</span><br><span class="line"><span class="keyword">extern</span> <span class="type">int</span> <span class="title function_">sys_whoami</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">fn_ptr sys_call_table[] = &#123; sys_setup, sys_exit, sys_fork, sys_read,</span><br><span class="line">sys_write, sys_open, sys_close, sys_waitpid, sys_creat, sys_link,</span><br><span class="line">sys_unlink, sys_execve, sys_chdir, sys_time, sys_mknod, sys_chmod,</span><br><span class="line">sys_chown, sys_break, sys_stat, sys_lseek, sys_getpid, sys_mount,</span><br><span class="line">sys_umount, sys_setuid, sys_getuid, sys_stime, sys_ptrace, sys_alarm,</span><br><span class="line">sys_fstat, sys_pause, sys_utime, sys_stty, sys_gtty, sys_access,</span><br><span class="line">sys_nice, sys_ftime, sys_sync, sys_kill, sys_rename, sys_mkdir,</span><br><span class="line">sys_rmdir, sys_dup, sys_pipe, sys_times, sys_prof, sys_brk, sys_setgid,</span><br><span class="line">sys_getgid, sys_signal, sys_geteuid, sys_getegid, sys_acct, sys_phys,</span><br><span class="line">sys_lock, sys_ioctl, sys_fcntl, sys_mpx, sys_setpgid, sys_ulimit,</span><br><span class="line">sys_uname, sys_umask, sys_chroot, sys_ustat, sys_dup2, sys_getppid,</span><br><span class="line">sys_getpgrp, sys_setsid, sys_sigaction, sys_sgetmask, sys_ssetmask,</span><br><span class="line">sys_setreuid,sys_setregid,sys_iam,sys_whoami&#125;;</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>修改<code>kernel/system_call.s</code>中系统调用的数量:</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nr_system_calls = 74</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>增加<code>kernel/who.c</code></li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;errno.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/kernel.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;asm/segment.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">char</span> kernelname[<span class="number">23</span>];</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">sys_iam</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *name)</span> &#123;</span><br><span class="line">    <span class="type">int</span> len = <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 1. 在获取字符串长度时，加入最大长度限制</span></span><br><span class="line">    <span class="keyword">while</span> (len &lt;= <span class="number">23</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (get_fs_byte(name + len) == <span class="string">&#x27;\0&#x27;</span>) &#123;</span><br><span class="line">            <span class="keyword">break</span>; <span class="comment">// 找到终止符</span></span><br><span class="line">        &#125;</span><br><span class="line">        len++;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 2. 检查长度是否符合规范</span></span><br><span class="line">    <span class="keyword">if</span> (len &gt; <span class="number">23</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> -EINVAL; <span class="comment">// 返回无效参数错误</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 3. 将字符串复制到内核空间</span></span><br><span class="line">    <span class="type">int</span> i;</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; len; i++) &#123;</span><br><span class="line">        kernelname[i] = get_fs_byte(name + i);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 4. 添加终止符</span></span><br><span class="line">    kernelname[len] = <span class="string">&#x27;\0&#x27;</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> len; <span class="comment">// 返回成功复制的长度</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">sys_whoami</span><span class="params">(<span class="type">char</span> *name, <span class="type">unsigned</span> <span class="type">int</span> size)</span> &#123;</span><br><span class="line">    <span class="type">int</span> len = <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 1. 获取内核字符串的长度，并使用之前定义的常量</span></span><br><span class="line">    <span class="comment">//    这里的循环也应该防止越界访问 kernelname</span></span><br><span class="line">    <span class="keyword">while</span> (len &lt;= <span class="number">23</span> &amp;&amp; kernelname[len] != <span class="string">&#x27;\0&#x27;</span>) &#123;</span><br><span class="line">        len++;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 2. 检查用户提供的缓冲区大小是否足够</span></span><br><span class="line">    <span class="comment">//    需要确保缓冲区可以容纳 len 个字符 + 1 个终止符</span></span><br><span class="line">    <span class="keyword">if</span> (len &gt;= size) &#123;</span><br><span class="line">        <span class="comment">// 如果用户缓冲区太小，返回错误码</span></span><br><span class="line">        <span class="keyword">return</span> -EINVAL;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 3. 复制字符串到用户空间</span></span><br><span class="line">    <span class="type">int</span> i;</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; len; i++) &#123;</span><br><span class="line">        put_fs_byte(kernelname[i], name + i);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 4. 添加终止符</span></span><br><span class="line">    put_fs_byte(<span class="string">&#x27;\0&#x27;</span>, name + len);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 5. 返回实际复制的字符数</span></span><br><span class="line">    <span class="keyword">return</span> len;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>在<code>kernel/Makefile</code>中增加，并编译内核</li>
+</ol>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">OBJS  = sched.o system_call.o traps.o asm.o fork.o \</span><br><span class="line">	panic.o printk.o vsprintf.o sys.o exit.o \</span><br><span class="line">	signal.o mktime.o who.o</span><br><span class="line">	</span><br><span class="line">who.s who.o: who.c ../<span class="keyword">include</span>/errno.h ../<span class="keyword">include</span>/signal.h \</span><br><span class="line">  ../<span class="keyword">include</span>/sys/types.h ../<span class="keyword">include</span>/sys/wait.h ../<span class="keyword">include</span>/linux/sched.h \</span><br><span class="line">  ../<span class="keyword">include</span>/linux/head.h ../<span class="keyword">include</span>/linux/fs.h ../<span class="keyword">include</span>/linux/mm.h \</span><br><span class="line">  ../<span class="keyword">include</span>/linux/kernel.h ../<span class="keyword">include</span>/linux/tty.h ../<span class="keyword">include</span>/termios.h \</span><br><span class="line">  ../<span class="keyword">include</span>/asm/segment.h</span><br></pre></td></tr></table></figure>
+
+<ol start="5">
+<li>启动系统后，在用户空间编写两个程序(<code>whoami.c</code>和<code>iam.c</code>），调用该系统调用</li>
+</ol>
+<p><code>whoami.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> __LIBRARY__</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;errno.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">_syscall2(<span class="type">int</span>, whoami, <span class="type">char</span>*, name, <span class="type">unsigned</span> <span class="type">int</span>, size)</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SIZE 23</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">char</span> name[SIZE+<span class="number">1</span>];</span><br><span class="line">	<span class="type">int</span> res;</span><br><span class="line">	res = whoami(name, SIZE+<span class="number">1</span>);</span><br><span class="line">	<span class="keyword">if</span> (res == <span class="number">-1</span>)</span><br><span class="line">		errno = EINVAL;</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>, name);</span><br><span class="line">	<span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>iam.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> __LIBRARY__</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;errno.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">_syscall1(<span class="type">int</span>, iam, <span class="type">const</span> <span class="type">char</span>*, name)</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> NAMELEN 100</span></span><br><span class="line"><span class="type">char</span> name[NAMELEN];</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> res;</span><br><span class="line">	<span class="type">int</span> namelen = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">if</span> (<span class="number">2</span> &lt;= argc) &#123;</span><br><span class="line">		<span class="keyword">while</span> ((name[namelen] = argv[<span class="number">1</span>][namelen]) != <span class="string">&#x27;\0&#x27;</span>)</span><br><span class="line">			namelen++; </span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;iam.c: %s, %d\n&quot;</span>, name, namelen);</span><br><span class="line">		res = iam(name);</span><br><span class="line">			errno = EINVAL;</span><br><span class="line">		<span class="keyword">return</span> res;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="6">
+<li>编译，这里有个小坑，需要把<code>/usr/include/</code>的<code>unistd.h</code>头文件更新一下，与编译时的源代码一致，否则会报<code>ENOENT</code>错误</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gcc -o whoami whoami.c </span><br><span class="line">gcc -o iam iam.c</span><br></pre></td></tr></table></figure>
+
+<ol start="7">
+<li>编译完成后，测试该系统调用，测试代码如下，采用的是 <a target="_blank" rel="noopener" href="https://github.com/Wangzhike/HIT-Linux-0.11/blob/master/2-syscall/test/testlab2.sh">https://github.com/Wangzhike/HIT-Linux-0.11/blob/master/2-syscall/test/testlab2.sh</a>.</li>
+</ol>
+<img src="https://raw.githubusercontent.com/lumosmax7/PicImage/main/202508212232334.png" alt="image-20250821223245366" style="zoom:50%;" />
+
+<p>整个过程为：</p>
+<ol>
+<li><p>用户态的程序调用系统调用函数<code>API</code></p>
+</li>
+<li><p><code>API</code>函数通过int 0x80的中断，进入到内核态中</p>
+</li>
+<li><p>在<code>system_call</code>根据系统调用号，来找到该系统调用的内核函数，并进行处理</p>
+</li>
+<li><p>处理完成后将内核函数的返回值返回给用户态程序</p>
+</li>
+</ol>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="http://github.com/lumosmax7">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%A0%E9%A2%98"><span class="toc-number">1.</span> <span class="toc-text">习题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E8%B7%B5"><span class="toc-number">2.</span> <span class="toc-text">实践</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://lumosmax7.github.io/2025/08/21/2025-08-21-14-52-44/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://lumosmax7.github.io/2025/08/21/2025-08-21-14-52-44/&text=操作系统原理、实现与实践（二）"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://lumosmax7.github.io/2025/08/21/2025-08-21-14-52-44/&title=操作系统原理、实现与实践（二）"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lumosmax7.github.io/2025/08/21/2025-08-21-14-52-44/&is_video=false&description=操作系统原理、实现与实践（二）"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=操作系统原理、实现与实践（二）&body=Check out this article: https://lumosmax7.github.io/2025/08/21/2025-08-21-14-52-44/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://lumosmax7.github.io/2025/08/21/2025-08-21-14-52-44/&title=操作系统原理、实现与实践（二）"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://lumosmax7.github.io/2025/08/21/2025-08-21-14-52-44/&title=操作系统原理、实现与实践（二）"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://lumosmax7.github.io/2025/08/21/2025-08-21-14-52-44/&title=操作系统原理、实现与实践（二）"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://lumosmax7.github.io/2025/08/21/2025-08-21-14-52-44/&title=操作系统原理、实现与实践（二）"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://lumosmax7.github.io/2025/08/21/2025-08-21-14-52-44/&name=操作系统原理、实现与实践（二）&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://lumosmax7.github.io/2025/08/21/2025-08-21-14-52-44/&t=操作系统原理、实现与实践（二）"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2026
+    Leo
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/lumosmax7">Projects</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

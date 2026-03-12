@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="黑群晖搭建硬件是铁威马的F2-221，双网口，cpu是Intel J3355 CPU。  烧录rr.img镜像到U盘中作为启动盘，Windows下可以用Rufus，Mac用Balena Etcher  GitHub - RROrg&#x2F;rr: Redpill Recovery (arpl-i18n)  完成后插入设备中等待启动完成，设备会自动获取IP（此时网线插入到下面的网口） 进入路由器查">
+<meta property="og:type" content="article">
+<meta property="og:title" content="黑群晖搭建以及利用FRP内网穿透DSM上的服务">
+<meta property="og:url" content="https://lumosmax7.github.io/2025/01/11/HeiQunHuiDaJian/index.html">
+<meta property="og:site_name" content="Lumosmax7">
+<meta property="og:description" content="黑群晖搭建硬件是铁威马的F2-221，双网口，cpu是Intel J3355 CPU。  烧录rr.img镜像到U盘中作为启动盘，Windows下可以用Rufus，Mac用Balena Etcher  GitHub - RROrg&#x2F;rr: Redpill Recovery (arpl-i18n)  完成后插入设备中等待启动完成，设备会自动获取IP（此时网线插入到下面的网口） 进入路由器查">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/lumosmax7/PicImage/main/202501112138983.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/lumosmax7/PicImage/main/202501112137507.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/lumosmax7/PicImage/main/202501112149084.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/lumosmax7/PicImage/main/202501112154955.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/lumosmax7/PicImage/main/202501112157664.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/lumosmax7/PicImage/main/202501112206337.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/lumosmax7/PicImage/main/202501112208151.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/lumosmax7/PicImage/main/202501112209614.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/lumosmax7/PicImage/main/202501112220831.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/lumosmax7/PicImage/main/202501112221360.png">
+<meta property="article:published_time" content="2025-01-11T14:55:44.000Z">
+<meta property="article:modified_time" content="2025-05-16T03:25:05.000Z">
+<meta property="article:author" content="Leo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/lumosmax7/PicImage/main/202501112138983.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>黑群晖搭建以及利用FRP内网穿透DSM上的服务</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/lumosmax7">Projects</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2025/01/26/2025-01-26-06-38-13/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2025/01/11/CloudFlareDaJianDockerJingXiang/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://lumosmax7.github.io/2025/01/11/HeiQunHuiDaJian/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://lumosmax7.github.io/2025/01/11/HeiQunHuiDaJian/&text=黑群晖搭建以及利用FRP内网穿透DSM上的服务"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://lumosmax7.github.io/2025/01/11/HeiQunHuiDaJian/&title=黑群晖搭建以及利用FRP内网穿透DSM上的服务"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lumosmax7.github.io/2025/01/11/HeiQunHuiDaJian/&is_video=false&description=黑群晖搭建以及利用FRP内网穿透DSM上的服务"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=黑群晖搭建以及利用FRP内网穿透DSM上的服务&body=Check out this article: https://lumosmax7.github.io/2025/01/11/HeiQunHuiDaJian/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://lumosmax7.github.io/2025/01/11/HeiQunHuiDaJian/&title=黑群晖搭建以及利用FRP内网穿透DSM上的服务"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://lumosmax7.github.io/2025/01/11/HeiQunHuiDaJian/&title=黑群晖搭建以及利用FRP内网穿透DSM上的服务"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://lumosmax7.github.io/2025/01/11/HeiQunHuiDaJian/&title=黑群晖搭建以及利用FRP内网穿透DSM上的服务"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://lumosmax7.github.io/2025/01/11/HeiQunHuiDaJian/&title=黑群晖搭建以及利用FRP内网穿透DSM上的服务"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://lumosmax7.github.io/2025/01/11/HeiQunHuiDaJian/&name=黑群晖搭建以及利用FRP内网穿透DSM上的服务&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://lumosmax7.github.io/2025/01/11/HeiQunHuiDaJian/&t=黑群晖搭建以及利用FRP内网穿透DSM上的服务"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%BB%91%E7%BE%A4%E6%99%96%E6%90%AD%E5%BB%BA"><span class="toc-number">1.</span> <span class="toc-text">黑群晖搭建</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="toc-number">2.</span> <span class="toc-text">反向代理服务器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F"><span class="toc-number">3.</span> <span class="toc-text">内网穿透</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%AB%AF"><span class="toc-number">3.1.</span> <span class="toc-text">服务器端</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF"><span class="toc-number">3.2.</span> <span class="toc-text">客户端</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#HTTPS%E8%AF%81%E4%B9%A6%E9%97%AE%E9%A2%98"><span class="toc-number">4.</span> <span class="toc-text">HTTPS证书问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%AB%A0"><span class="toc-number">6.</span> <span class="toc-text">参考文章</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        黑群晖搭建以及利用FRP内网穿透DSM上的服务
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">Leo</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-01-11T14:55:44.000Z" class="dt-published" itemprop="datePublished">2025-01-11</time>
+        
+      
+    </div>
+
+
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="黑群晖搭建"><a href="#黑群晖搭建" class="headerlink" title="黑群晖搭建"></a>黑群晖搭建</h2><p>硬件是铁威马的F2-221，双网口，cpu是Intel J3355 CPU。</p>
+<ol>
+<li>烧录rr.img镜像到U盘中作为启动盘，Windows下可以用Rufus，Mac用Balena Etcher</li>
+</ol>
+<p><a target="_blank" rel="noopener" href="https://github.com/RROrg/rr">GitHub - RROrg&#x2F;rr: Redpill Recovery (arpl-i18n)</a></p>
+<ol start="2">
+<li>完成后插入设备中等待启动完成，设备会自动获取IP（此时网线插入到下面的网口）</li>
+<li>进入路由器查看连接IP，输入<a href="http://IP:7681，进入指令界面">http://IP:7681，进入指令界面</a></li>
+<li>按照需求选择，build loader.</li>
+<li>完成后利用Synology assistant查找设备，并进行初始化</li>
+<li>完成初始化后等待系统重启</li>
+</ol>
+<h2 id="反向代理服务器"><a href="#反向代理服务器" class="headerlink" title="反向代理服务器"></a>反向代理服务器</h2><p>如果想要访问NAS上的其他服务（emby&#x2F;gitea&#x2F;qbittorrent）可以利用群晖自带的反向代理服务器的功能，配置相应的转发规则，即可实现</p>
+<ol>
+<li>打开控制面板，搜索反向代理</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/lumosmax7/PicImage/main/202501112138983.png"></p>
+<ol start="2">
+<li>新建规则，按照需求进行添加</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/lumosmax7/PicImage/main/202501112137507.png"></p>
+<p>注意：<br>整体思路是通过访问443 https端口，此时来源设置为未来想要访问的域名，访问时通过群晖来对流量进行转发，转发至相应的服务端口上，这样方便配置https。</p>
+<h2 id="内网穿透"><a href="#内网穿透" class="headerlink" title="内网穿透"></a>内网穿透</h2><p>需要一台有公网IP的vps，并利用frp实现</p>
+<h3 id="服务器端"><a href="#服务器端" class="headerlink" title="服务器端"></a>服务器端</h3><ol>
+<li>下载frp：</li>
+</ol>
+<p><a target="_blank" rel="noopener" href="https://github.com/fatedier/frp">GitHub - fatedier&#x2F;frp: A fast reverse proxy to help you expose a local server behind a NAT or firewall to the internet.</a></p>
+<ol start="2">
+<li>编辑<code>frps.toml</code></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">bindPort =  // 与frpc服务端绑定端口</span><br><span class="line">auth.method=&quot;token&quot;</span><br><span class="line">auth.token =   //设置Token验证</span><br><span class="line">vhostHTTPPort=80</span><br><span class="line">vhostHTTPSPort =443 </span><br><span class="line"></span><br><span class="line">log.to = &quot;/opt/frp.log&quot; //日志相关</span><br><span class="line">log.level = &quot;info&quot;</span><br><span class="line">log.maxDays=3</span><br></pre></td></tr></table></figure>
+
+
+
+<ol start="3">
+<li>试运行是否有错误</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./frps -c frps.toml</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>加入systemctl服务，程序在vps启动时自启动,在<code>/etc/systemd/system/</code> 创建frps.service，内容如下：</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[Unit]</span><br><span class="line">Description = frp server</span><br><span class="line">After = network.target syslog.target</span><br><span class="line">Wants = network.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type = simple</span><br><span class="line">ExecStart = /opt/frp/frps -c /opt/frp/frps.toml //具体的执行路径</span><br><span class="line">Restart = always //以防程序挂了，自动重启</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy = multi-user.target</span><br><span class="line">                                   </span><br></pre></td></tr></table></figure>
+
+<h3 id="客户端"><a href="#客户端" class="headerlink" title="客户端"></a>客户端</h3><p>客户端部署在Nas上，开启群晖的SSH功能</p>
+<ol>
+<li>在<code>/volumn1</code>下新建<code>frp</code>文件夹</li>
+<li>进入<code>frp</code>文件夹下，下载<code>frp</code> </li>
+<li>编辑<code>frpc.toml</code></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">serverAddr = &quot;&quot; //frps服务端的ip</span><br><span class="line">serverPort =  //与frps服务端的绑定的端口一致</span><br><span class="line">auth.method = &quot;token&quot;</span><br><span class="line">auth.token = &quot;&quot; //验证token</span><br><span class="line"></span><br><span class="line">[[proxies]]</span><br><span class="line">name = &quot;dsms&quot; //服务名称</span><br><span class="line">type = &quot;https&quot;</span><br><span class="line">localIP = &quot;192.168.1.15&quot; //设置群晖本地的IP</span><br><span class="line">localPort = 443 </span><br><span class="line">customDomains = [&quot;xxx&quot;] //设置访问时的域名，与上面反向代理服务器保持一致</span><br><span class="line"></span><br><span class="line">[[proxies]]</span><br><span class="line">name = &quot;qb&quot;</span><br><span class="line">type = &quot;https&quot;</span><br><span class="line">localIP = &quot;192.168.1.15&quot;</span><br><span class="line">localPort = 443 </span><br><span class="line">customDomains = [&quot;yyy&quot;] //同样，示例用</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li><p>试运行是否有错误</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./frpc -c frpc.toml</span><br></pre></td></tr></table></figure>
+
+</li>
+<li><p>加入systemctl，加入的方法与上面一致。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[Unit]</span><br><span class="line">Description = frp server</span><br><span class="line">After = local-fs.target multi-user.target  //程序在群晖系统启动完成并挂载硬盘后启动</span><br><span class="line">Wants = local-fs.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type = simple</span><br><span class="line">ExecStart = /volume1/frp/frp_0.61.1_linux_amd64/frpc -c /volume1/frp/frp_0.61.1_linux_amd64/frpc.toml</span><br><span class="line">Restart=always</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy = multi-user.target</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="HTTPS证书问题"><a href="#HTTPS证书问题" class="headerlink" title="HTTPS证书问题"></a>HTTPS证书问题</h2><p>上面已经打通了内网NAS和VPS的HTTP通道，为了实现TLS的加密，需要先完善证书问题，这里利用acme.sh的docker容器来实现自动申请证书，续签证书以及向dsm导入证书</p>
+<ol>
+<li>在套件中下载container套件，这里需要docker，请准备好科学上网的环境，如果没有，可以利用cloudflare 自建docker 加速镜像,参考<a target="_blank" rel="noopener" href="https://www.cnblogs.com/deali/p/18310886#%E9%85%8D%E7%BD%AEregistry">使用Cloudflare Worker加速docker镜像
+</a></li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/lumosmax7/PicImage/main/202501112149084.png"></p>
+<ol start="2">
+<li><p>在container套件中搜索nailpang&#x2F;acme.sh,如果container无法搜索的话，通过ssh 进入群晖利用命令行实现：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo docker pull nailpang/acme.sh //加入sudo，不然会权限报错</span><br></pre></td></tr></table></figure>
+
+</li>
+<li><p>在container的映像中运行，自动重启先不启用，调试完成后启用，在docker文件下新建<code>acme.sh</code>，并映射到<code>/acme.sh</code></p>
+</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/lumosmax7/PicImage/main/202501112154955.png"></p>
+<ol start="4">
+<li>在环境变量中配置如下：</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/lumosmax7/PicImage/main/202501112157664.png"></p>
+<ul>
+<li>SYNO： 群晖用户名</li>
+<li>SYNO_PASSWORD: 群晖密码</li>
+<li>SYNO_Certificat: 为空替换默认的证书</li>
+<li>CF_TOKEN: 利用DNS验证获取证书，这里是CF的TOKEN，获取方式见<a target="_blank" rel="noopener" href="https://github.com/acmesh-official/acme.sh/wiki/dnsapi#dns_cf">acme.sh&#x2F;wiki&#x2F;dnsapi</a></li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/lumosmax7/PicImage/main/202501112206337.png"></p>
+<p>这里建议重新新建一个群晖账号，关闭所有文件读取写入的权限，但需要加入administrator用户组<br><img src="https://raw.githubusercontent.com/lumosmax7/PicImage/main/202501112208151.png"></p>
+<p><img src="https://raw.githubusercontent.com/lumosmax7/PicImage/main/202501112209614.png"></p>
+<ol start="5">
+<li><p>网络选择<code>host</code>,并在执行命令的地方加入<code>daemon</code>启动守护模式</p>
+</li>
+<li><p>ssh登陆群晖，在<code>/volume1/docker/acme.sh</code>新建<code>cert.sh</code></p>
+</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line"></span><br><span class="line"># 域名</span><br><span class="line"></span><br><span class="line">DOMAIN=&#x27;&#x27; //使用泛域名，方便做穿透</span><br><span class="line"> </span><br><span class="line"># # DNS类型</span><br><span class="line"></span><br><span class="line">DNS=&#x27;dns_cf&#x27;</span><br><span class="line"></span><br><span class="line"># DNS API 生效等待时间 值(单位：秒)，一般120即可</span><br><span class="line"></span><br><span class="line"># 某些域名服务商的API生效时间较大，需要将这个值加大(比如900)</span><br><span class="line"></span><br><span class="line">DNS_SLEEP=120</span><br><span class="line"></span><br><span class="line"># 证书服务商，zerossl 和 letsencrypt</span><br><span class="line"></span><br><span class="line">CERT_SERVER=&#x27;letsencrypt&#x27;</span><br><span class="line"></span><br><span class="line">generateCrtCommand=&quot;acme.sh --force --log --issue --server $&#123;CERT_SERVER&#125; --dns $&#123;DNS&#125; --dnssleep $&#123;DNS_SLEEP&#125; -d &quot;$&#123;DOMAIN&#125;&quot;&quot;</span><br><span class="line"></span><br><span class="line">installCrtCommand=&quot;acme.sh --deploy -d &quot;$&#123;DOMAIN&#125;&quot;  --deploy-hook synology_dsm&quot; //利用deplot-hook部署该证书 </span><br><span class="line"></span><br><span class="line">docker exec acme.sh $generateCrtCommand</span><br></pre></td></tr></table></figure>
+
+<ol start="7">
+<li>试运行该脚本<code>sudo bash /volume1/docker/acme.sh/cert.sh</code>,查看最后一步是否返回成功</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/lumosmax7/PicImage/main/202501112220831.png"></p>
+<ol start="8">
+<li>由于自签的证书在三个月后会过期，因此在群晖中加入计划任务，每月对证书续签一次，运行权限是root</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bash /volume1/docker/acme.sh/cert.sh  &gt;&gt;/volume1/docker/acme.sh/log.txt 2&gt;&amp;1</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://raw.githubusercontent.com/lumosmax7/PicImage/main/202501112221360.png"></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>反向代理器的坑点比较多，之前怎么配置都不正确，参考了其他人，通过443转发之后，居然就成功。证书的配置也是，还把之前的群晖直接搞崩了，也是参考别人用<code>acme.sh</code>中的<code>depoy-hook</code>可以直接部署，一次成功。完成上面的步骤，就可以访问自己设定的域名，穿透到NAS的数据了。<strong>务必注意数据流量以及防火墙的设置</strong></p>
+<h2 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h2><ol>
+<li><a target="_blank" rel="noopener" href="https://www.ioiox.com/archives/85.html">群晖NAS反向代理 + 内网穿透 &#x3D; 无需端口访问内网所有服务无需端口</a></li>
+<li><a target="_blank" rel="noopener" href="https://post.smzdm.com/p/a6d5dl6e/">群晖使用acme申请泛域名证书并设置自动证书部署</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.mspace.cc/archives/1002">12 代平台 DSM7.2.1 黑群晖安装教程 | 保姆喂饭级图文 | 附 2024 最新 ARPL 引导镜像
+</a></li>
+</ol>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="http://github.com/lumosmax7">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%BB%91%E7%BE%A4%E6%99%96%E6%90%AD%E5%BB%BA"><span class="toc-number">1.</span> <span class="toc-text">黑群晖搭建</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="toc-number">2.</span> <span class="toc-text">反向代理服务器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F"><span class="toc-number">3.</span> <span class="toc-text">内网穿透</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%AB%AF"><span class="toc-number">3.1.</span> <span class="toc-text">服务器端</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF"><span class="toc-number">3.2.</span> <span class="toc-text">客户端</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#HTTPS%E8%AF%81%E4%B9%A6%E9%97%AE%E9%A2%98"><span class="toc-number">4.</span> <span class="toc-text">HTTPS证书问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%AB%A0"><span class="toc-number">6.</span> <span class="toc-text">参考文章</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://lumosmax7.github.io/2025/01/11/HeiQunHuiDaJian/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://lumosmax7.github.io/2025/01/11/HeiQunHuiDaJian/&text=黑群晖搭建以及利用FRP内网穿透DSM上的服务"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://lumosmax7.github.io/2025/01/11/HeiQunHuiDaJian/&title=黑群晖搭建以及利用FRP内网穿透DSM上的服务"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lumosmax7.github.io/2025/01/11/HeiQunHuiDaJian/&is_video=false&description=黑群晖搭建以及利用FRP内网穿透DSM上的服务"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=黑群晖搭建以及利用FRP内网穿透DSM上的服务&body=Check out this article: https://lumosmax7.github.io/2025/01/11/HeiQunHuiDaJian/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://lumosmax7.github.io/2025/01/11/HeiQunHuiDaJian/&title=黑群晖搭建以及利用FRP内网穿透DSM上的服务"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://lumosmax7.github.io/2025/01/11/HeiQunHuiDaJian/&title=黑群晖搭建以及利用FRP内网穿透DSM上的服务"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://lumosmax7.github.io/2025/01/11/HeiQunHuiDaJian/&title=黑群晖搭建以及利用FRP内网穿透DSM上的服务"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://lumosmax7.github.io/2025/01/11/HeiQunHuiDaJian/&title=黑群晖搭建以及利用FRP内网穿透DSM上的服务"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://lumosmax7.github.io/2025/01/11/HeiQunHuiDaJian/&name=黑群晖搭建以及利用FRP内网穿透DSM上的服务&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://lumosmax7.github.io/2025/01/11/HeiQunHuiDaJian/&t=黑群晖搭建以及利用FRP内网穿透DSM上的服务"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2026
+    Leo
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/lumosmax7">Projects</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

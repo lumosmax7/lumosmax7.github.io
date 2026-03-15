@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="一、背景与目标随着家庭设备数量增多、远程访问需求提升，对原有家庭内网进行系统性改造，目标如下：  将所有家庭服务器与终端设备纳入统一的私有网络，实现跨网络访问； 在境外服务器上部署代理服务，每个服务器部署 Vision+Reality 解决移动端（Android &#x2F; iOS &#x2F; iPadOS）无法同时运行两个 VPN 的系统限制，实现流量的无缝转发。   二、已完成步骤2.1">
+<meta property="og:type" content="article">
+<meta property="og:title" content="家庭内网改造技术总结报告(一)">
+<meta property="og:url" content="https://lumosmax7.github.io/2026/03/15/2026-03-15-13-25-42/index.html">
+<meta property="og:site_name" content="Lumosmax7">
+<meta property="og:description" content="一、背景与目标随着家庭设备数量增多、远程访问需求提升，对原有家庭内网进行系统性改造，目标如下：  将所有家庭服务器与终端设备纳入统一的私有网络，实现跨网络访问； 在境外服务器上部署代理服务，每个服务器部署 Vision+Reality 解决移动端（Android &#x2F; iOS &#x2F; iPadOS）无法同时运行两个 VPN 的系统限制，实现流量的无缝转发。   二、已完成步骤2.1">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2026-03-15T13:26:08.000Z">
+<meta property="article:modified_time" content="2026-03-15T13:26:44.468Z">
+<meta property="article:author" content="Leo">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>家庭内网改造技术总结报告(一)</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/lumosmax7">Projects</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2026/03/12/2026-03-12-10-08-55/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://lumosmax7.github.io/2026/03/15/2026-03-15-13-25-42/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://lumosmax7.github.io/2026/03/15/2026-03-15-13-25-42/&text=家庭内网改造技术总结报告(一)"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://lumosmax7.github.io/2026/03/15/2026-03-15-13-25-42/&title=家庭内网改造技术总结报告(一)"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lumosmax7.github.io/2026/03/15/2026-03-15-13-25-42/&is_video=false&description=家庭内网改造技术总结报告(一)"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=家庭内网改造技术总结报告(一)&body=Check out this article: https://lumosmax7.github.io/2026/03/15/2026-03-15-13-25-42/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://lumosmax7.github.io/2026/03/15/2026-03-15-13-25-42/&title=家庭内网改造技术总结报告(一)"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://lumosmax7.github.io/2026/03/15/2026-03-15-13-25-42/&title=家庭内网改造技术总结报告(一)"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://lumosmax7.github.io/2026/03/15/2026-03-15-13-25-42/&title=家庭内网改造技术总结报告(一)"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://lumosmax7.github.io/2026/03/15/2026-03-15-13-25-42/&title=家庭内网改造技术总结报告(一)"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://lumosmax7.github.io/2026/03/15/2026-03-15-13-25-42/&name=家庭内网改造技术总结报告(一)&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://lumosmax7.github.io/2026/03/15/2026-03-15-13-25-42/&t=家庭内网改造技术总结报告(一)"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E8%83%8C%E6%99%AF%E4%B8%8E%E7%9B%AE%E6%A0%87"><span class="toc-number">1.</span> <span class="toc-text">一、背景与目标</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%B7%B2%E5%AE%8C%E6%88%90%E6%AD%A5%E9%AA%A4"><span class="toc-number">2.</span> <span class="toc-text">二、已完成步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E5%85%A8%E8%8A%82%E7%82%B9%E9%83%A8%E7%BD%B2-Tailscale"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 全节点部署 Tailscale</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-1-%E6%96%B9%E6%A1%88%E9%80%89%E5%9E%8B"><span class="toc-number">2.2.</span> <span class="toc-text">2.1.1 方案选型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-2-%E9%83%A8%E7%BD%B2%E6%AD%A5%E9%AA%A4"><span class="toc-number">2.3.</span> <span class="toc-text">2.1.2 部署步骤</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-3-%E9%AA%8C%E8%AF%81"><span class="toc-number">2.4.</span> <span class="toc-text">2.1.3 验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E5%85%A8%E8%8A%82%E7%82%B9%E9%83%A8%E7%BD%B2-Vision-Reality-%E4%BB%A3%E7%90%86%E8%8A%82%E7%82%B9"><span class="toc-number">2.5.</span> <span class="toc-text">2.2 全节点部署 Vision &amp; Reality 代理节点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-1-%E6%96%B9%E6%A1%88%E9%80%89%E5%9E%8B"><span class="toc-number">2.6.</span> <span class="toc-text">2.2.1 方案选型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-2-%E9%83%A8%E7%BD%B2%E6%AD%A5%E9%AA%A4"><span class="toc-number">2.7.</span> <span class="toc-text">2.2.2 部署步骤</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-3-%E9%AA%8C%E8%AF%81"><span class="toc-number">2.8.</span> <span class="toc-text">2.2.3 验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E9%85%8D%E7%BD%AE-Xray-%E8%B7%AF%E7%94%B1%E8%A7%84%E5%88%99%EF%BC%8C%E6%94%BE%E8%A1%8C-Tailscale-%E6%B5%81%E9%87%8F"><span class="toc-number">2.9.</span> <span class="toc-text">2.3 配置 Xray 路由规则，放行 Tailscale 流量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-1-%E9%97%AE%E9%A2%98%E8%83%8C%E6%99%AF"><span class="toc-number">2.10.</span> <span class="toc-text">2.3.1 问题背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-2-%E8%A7%A3%E5%86%B3%E6%80%9D%E8%B7%AF"><span class="toc-number">2.11.</span> <span class="toc-text">2.3.2 解决思路</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-3-%E5%AE%9E%E6%96%BD%E6%AD%A5%E9%AA%A4"><span class="toc-number">2.12.</span> <span class="toc-text">2.3.3 实施步骤</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-%E4%BD%BF%E7%94%A8%E5%9B%BD%E5%86%85%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%87%AA%E5%BB%BA-DERP-%E4%B8%AD%E7%BB%A7%EF%BC%88%E4%BC%98%E5%8C%96%E8%B7%A8%E5%A2%83%E9%93%BE%E8%B7%AF%E7%A8%B3%E5%AE%9A%E6%80%A7%EF%BC%89"><span class="toc-number">2.13.</span> <span class="toc-text">2.4 使用国内服务器自建 DERP 中继（优化跨境链路稳定性）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-1-%E7%9B%AE%E6%A0%87%E4%B8%8E%E6%80%9D%E8%B7%AF"><span class="toc-number">2.14.</span> <span class="toc-text">2.4.1 目标与思路</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-2-%E5%AE%9E%E6%96%BD%E6%AD%A5%E9%AA%A4%EF%BC%88%E5%8F%82%E8%80%83%E5%AE%98%E6%96%B9-Custom-DERP-%E6%96%87%E6%A1%A3%EF%BC%89"><span class="toc-number">2.15.</span> <span class="toc-text">2.4.2 实施步骤（参考官方 Custom DERP 文档）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-3-Admin-Console-Access-controls-%E9%85%8D%E7%BD%AE%E7%A4%BA%E4%BE%8B"><span class="toc-number">2.16.</span> <span class="toc-text">2.4.3 Admin Console Access controls 配置示例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-4-%E9%AA%8C%E8%AF%81"><span class="toc-number">2.17.</span> <span class="toc-text">2.4.4 验证</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="toc-number">3.</span> <span class="toc-text">三、参考资料</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        家庭内网改造技术总结报告(一)
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">Leo</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2026-03-15T13:26:08.000Z" class="dt-published" itemprop="datePublished">2026-03-15</time>
+        
+      
+    </div>
+
+
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="一、背景与目标"><a href="#一、背景与目标" class="headerlink" title="一、背景与目标"></a>一、背景与目标</h2><p>随着家庭设备数量增多、远程访问需求提升，对原有家庭内网进行系统性改造，目标如下：</p>
+<ul>
+<li>将所有家庭服务器与终端设备纳入统一的私有网络，实现跨网络访问；</li>
+<li>在境外服务器上部署代理服务，每个服务器部署 Vision+Reality</li>
+<li>解决移动端（Android &#x2F; iOS &#x2F; iPadOS）无法同时运行两个 VPN 的系统限制，实现流量的无缝转发。</li>
+</ul>
+<hr>
+<h2 id="二、已完成步骤"><a href="#二、已完成步骤" class="headerlink" title="二、已完成步骤"></a>二、已完成步骤</h2><h3 id="2-1-全节点部署-Tailscale"><a href="#2-1-全节点部署-Tailscale" class="headerlink" title="2.1 全节点部署 Tailscale"></a>2.1 全节点部署 Tailscale</h3><h3 id="2-1-1-方案选型"><a href="#2-1-1-方案选型" class="headerlink" title="2.1.1 方案选型"></a>2.1.1 方案选型</h3><p>选用 <a target="_blank" rel="noopener" href="https://tailscale.com/">Tailscale</a> 作为内网组网方案，其基于 WireGuard 协议构建，具备以下优势：</p>
+<ul>
+<li>零配置穿透 NAT，无需暴露公网 IP；</li>
+<li>去中心化的点对点连接（依托 DERP 中继兜底）；</li>
+<li>支持 ACL 精细访问控制；</li>
+<li>官方客户端覆盖 Linux、macOS、Windows、Android、iOS&#x2F;iPadOS。</li>
+</ul>
+<h3 id="2-1-2-部署步骤"><a href="#2-1-2-部署步骤" class="headerlink" title="2.1.2 部署步骤"></a>2.1.2 部署步骤</h3><p>按照 <a target="_blank" rel="noopener" href="https://tailscale.com/kb/installation">Tailscale 官方文档</a> 在所有节点依次完成安装。</p>
+<p><strong>服务器端（Linux）：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装 Tailscale</span></span><br><span class="line">curl -fsSL &lt;https://tailscale.com/install.sh&gt; | sh</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动并加入网络</span></span><br><span class="line"><span class="built_in">sudo</span> tailscale up</span><br><span class="line"></span><br><span class="line"><span class="comment"># 开机自启</span></span><br><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">enable</span> --now tailscaled</span><br></pre></td></tr></table></figure>
+
+<p><strong>客户端（Android &#x2F; iOS &#x2F; iPadOS）：</strong></p>
+<p>在各应用商店搜索并安装 Tailscale 官方客户端，登录同一账号即自动加入网络。</p>
+<h3 id="2-1-3-验证"><a href="#2-1-3-验证" class="headerlink" title="2.1.3 验证"></a>2.1.3 验证</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看所有在线节点</span></span><br><span class="line">tailscale status</span><br><span class="line"></span><br><span class="line"><span class="comment"># 测试节点间连通性</span></span><br><span class="line">ping &lt;节点 Tailscale IP&gt;</span><br></pre></td></tr></table></figure>
+
+<p>所有服务器节点及终端设备均成功加入同一 Tailscale 网络，可互相访问。</p>
+<hr>
+<h3 id="2-2-全节点部署-Vision-Reality-代理节点"><a href="#2-2-全节点部署-Vision-Reality-代理节点" class="headerlink" title="2.2 全节点部署 Vision &amp; Reality 代理节点"></a>2.2 全节点部署 Vision &amp; Reality 代理节点</h3><h3 id="2-2-1-方案选型"><a href="#2-2-1-方案选型" class="headerlink" title="2.2.1 方案选型"></a>2.2.1 方案选型</h3><p>使用开源脚本 <a target="_blank" rel="noopener" href="https://github.com/mack-a/v2ray-agent">v2ray-agent</a> 在各节点上批量部署代理服务，选用以下两种协议：</p>
+<table>
+<thead>
+<tr>
+<th>协议</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>VLESS + Vision</strong></td>
+<td>基于 VLESS 的新一代流量控制协议，抗检测能力强</td>
+</tr>
+<tr>
+<td><strong>VLESS + Reality</strong></td>
+<td>无需自有域名，借用真实网站 TLS 指纹，隐蔽性极高</td>
+</tr>
+</tbody></table>
+<h3 id="2-2-2-部署步骤"><a href="#2-2-2-部署步骤" class="headerlink" title="2.2.2 部署步骤"></a>2.2.2 部署步骤</h3><p><strong>执行一键安装脚本：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 下载并执行 v2ray-agent 脚本</span></span><br><span class="line">wget -P /root -N --no-check-certificate \\</span><br><span class="line">  <span class="string">&quot;&lt;https://raw.githubusercontent.com/mack-a/v2ray-agent/master/install.sh&gt;&quot;</span> \\</span><br><span class="line">  &amp;&amp; <span class="built_in">chmod</span> 755 /root/install.sh \\</span><br><span class="line">  &amp;&amp; bash /root/install.sh</span><br></pre></td></tr></table></figure>
+
+<p>在交互菜单中依次完成：</p>
+<ol>
+<li>选择安装 Xray-core；</li>
+<li>选择 VLESS + Vision（需绑定已解析到本机 IP 的域名）；</li>
+<li>选择 VLESS + Reality（填入伪装域名，如 <code>www.microsoft.com</code>）；</li>
+<li>脚本自动申请 TLS 证书（Vision 协议）、生成密钥对（Reality 协议）并完成配置。</li>
+</ol>
+<h3 id="2-2-3-验证"><a href="#2-2-3-验证" class="headerlink" title="2.2.3 验证"></a>2.2.3 验证</h3><p>脚本执行完毕后，获取各协议的订阅链接或分享链接，导入客户端（如 v2rayN、Shadowrocket、Streisand 等）验证连通性。</p>
+<hr>
+<h3 id="2-3-配置-Xray-路由规则，放行-Tailscale-流量"><a href="#2-3-配置-Xray-路由规则，放行-Tailscale-流量" class="headerlink" title="2.3 配置 Xray 路由规则，放行 Tailscale 流量"></a>2.3 配置 Xray 路由规则，放行 Tailscale 流量</h3><h3 id="2-3-1-问题背景"><a href="#2-3-1-问题背景" class="headerlink" title="2.3.1 问题背景"></a>2.3.1 问题背景</h3><p>Android、iOS 及 iPadOS 系统存在限制：<strong>同一时间只能激活一个 VPN 连接</strong>。当 Tailscale 作为 VPN 运行时，代理客户端（如 Shadowrocket、v2rayNG）仍可连接服务器，但若 Xray 服务端将来自 Tailscale 网段（<code>100.64.0.0/10</code>）的入站流量也走代理出口，会导致流量回环或无法建立连接。</p>
+<h3 id="2-3-2-解决思路"><a href="#2-3-2-解决思路" class="headerlink" title="2.3.2 解决思路"></a>2.3.2 解决思路</h3><p>在各服务器节点的 Xray 路由配置中，为 Tailscale 网段（<code>100.64.0.0/10</code>）以及相关 Google 域名添加 <strong>直连（direct）规则</strong>，使 Xray 对这部分流量不做代理处理，直接放行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">移动端设备（仅开启 Tailscale）</span><br><span class="line">  │</span><br><span class="line">  │  通过 Tailscale 内网 IP 连接服务器 Xray 监听端口</span><br><span class="line">  ▼</span><br><span class="line">服务器 Xray（路由判断）</span><br><span class="line">  ├── 来源 IP 属于 100.64.0.0/10 ──▶ z_direct_outbound（直连放行）</span><br><span class="line">  └── 其他流量 ──────────────────▶ 正常代理出口</span><br></pre></td></tr></table></figure>
+
+<p>移动端只需开启 Tailscale，代理客户端直接连接服务器的 Tailscale 内网 IP，Xray 路由规则自动识别并放行，<strong>无需同时开启两个 VPN，也无需额外端口转发</strong>。</p>
+<blockquote>
+<p><strong>客户端配置说明：</strong> 需在 Shadowrocket &#x2F; v2rayNG 等代理客户端中，将服务器地址从公网 IP 或域名改为对应节点的 Tailscale IP（<code>100.x.x.x</code>），端口及其他参数保持不变。Tailscale IP 可通过 <code>tailscale status</code> 查看。</p>
+</blockquote>
+<h3 id="2-3-3-实施步骤"><a href="#2-3-3-实施步骤" class="headerlink" title="2.3.3 实施步骤"></a>2.3.3 实施步骤</h3><p>v2ray-agent 脚本的 Xray 路由配置文件位于 <code>/etc/v2ray-agent/xray/conf/09_routing.json</code>。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 进入配置目录</span></span><br><span class="line"><span class="built_in">cd</span> /etc/v2ray-agent/xray/conf/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 备份旧路由配置</span></span><br><span class="line"><span class="built_in">cp</span> 09_routing.json 09_routing.json.bak</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 覆盖写入包含 Tailscale 直连规则的新路由配置</span></span><br><span class="line"><span class="built_in">cat</span> &gt; 09_routing.json &lt;&lt; <span class="string">EOF</span></span><br><span class="line"><span class="string">&#123;</span></span><br><span class="line"><span class="string">  &quot;routing&quot;: &#123;</span></span><br><span class="line"><span class="string">    &quot;domainStrategy&quot;: &quot;IPIfNonMatch&quot;,</span></span><br><span class="line"><span class="string">    &quot;rules&quot;: [</span></span><br><span class="line"><span class="string">      &#123;</span></span><br><span class="line"><span class="string">        &quot;type&quot;: &quot;field&quot;,</span></span><br><span class="line"><span class="string">        &quot;ip&quot;: [&quot;100.64.0.0/10&quot;],</span></span><br><span class="line"><span class="string">        &quot;outboundTag&quot;: &quot;z_direct_outbound&quot;</span></span><br><span class="line"><span class="string">      &#125;,</span></span><br><span class="line"><span class="string">      &#123;</span></span><br><span class="line"><span class="string">        &quot;type&quot;: &quot;field&quot;,</span></span><br><span class="line"><span class="string">        &quot;domain&quot;: [</span></span><br><span class="line"><span class="string">          &quot;domain:gstatic.com&quot;,</span></span><br><span class="line"><span class="string">          &quot;domain:googleapis.com&quot;,</span></span><br><span class="line"><span class="string">          &quot;domain:googleapis.cn&quot;</span></span><br><span class="line"><span class="string">        ],</span></span><br><span class="line"><span class="string">        &quot;outboundTag&quot;: &quot;z_direct_outbound&quot;</span></span><br><span class="line"><span class="string">      &#125;</span></span><br><span class="line"><span class="string">    ]</span></span><br><span class="line"><span class="string">  &#125;</span></span><br><span class="line"><span class="string">&#125;</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 重启 Xray 使配置生效</span></span><br><span class="line">systemctl restart xray</span><br><span class="line"></span><br><span class="line"><span class="comment"># 5. 验证服务状态</span></span><br><span class="line">systemctl status xray --no-pager</span><br></pre></td></tr></table></figure>
+
+<p><strong>关键配置说明：</strong></p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>domainStrategy</code></td>
+<td><code>IPIfNonMatch</code></td>
+<td>域名无法匹配规则时，解析为 IP 后再匹配</td>
+</tr>
+<tr>
+<td><code>ip: 100.64.0.0/10</code></td>
+<td>Tailscale 保留网段</td>
+<td>覆盖所有 Tailscale 节点的虚拟 IP</td>
+</tr>
+<tr>
+<td><code>outboundTag</code></td>
+<td><code>z_direct_outbound</code></td>
+<td>v2ray-agent 预设的直连出口标签</td>
+</tr>
+<tr>
+<td><code>domain: gstatic.com</code> 等</td>
+<td>Google 相关域名</td>
+<td>避免这些域名被误判走代理导致异常</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="2-4-使用国内服务器自建-DERP-中继（优化跨境链路稳定性）"><a href="#2-4-使用国内服务器自建-DERP-中继（优化跨境链路稳定性）" class="headerlink" title="2.4 使用国内服务器自建 DERP 中继（优化跨境链路稳定性）"></a>2.4 使用国内服务器自建 DERP 中继（优化跨境链路稳定性）</h3><h3 id="2-4-1-目标与思路"><a href="#2-4-1-目标与思路" class="headerlink" title="2.4.1 目标与思路"></a>2.4.1 目标与思路</h3><p>当两端节点无法直接打洞时，Tailscale 会回落到 DERP 中继转发。为降低跨境回落链路延迟，可在国内部署一台 DERP 服务器，并将其加入自定义 DERP 配置中，作为优先中继节点之一。</p>
+<h3 id="2-4-2-实施步骤（参考官方-Custom-DERP-文档）"><a href="#2-4-2-实施步骤（参考官方-Custom-DERP-文档）" class="headerlink" title="2.4.2 实施步骤（参考官方 Custom DERP 文档）"></a>2.4.2 实施步骤（参考官方 Custom DERP 文档）</h3><p>在国内 Linux 服务器上部署 <code>derper</code>，并确保以下端口可用：</p>
+<ul>
+<li><code>443/tcp</code>：DERP over TLS；</li>
+<li><code>3478/udp</code>：STUN（可选但建议开启，提升打洞成功率）。</li>
+</ul>
+<p>示例（systemd 方式，需先安装 Go 并编译 <code>derper</code>）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 编译并安装 derper</span></span><br><span class="line">go install tailscale.com/cmd/derper@latest</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 启动 derper（示例：Let&#x27;s Encrypt 自动申请证书，监听 443 和 3478）</span></span><br><span class="line"><span class="built_in">sudo</span> ~/go/bin/derper \\</span><br><span class="line">  -hostname &lt;YOUR_DERP_FQDN&gt; \\</span><br><span class="line">  -certmode letsencrypt \\</span><br><span class="line">  -a :443 \\</span><br><span class="line">  -stun \\</span><br><span class="line">  -stun-port 3478 \\</span><br><span class="line">  -verify-clients</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>注意事项：</strong></p>
+<ul>
+<li><code>certmode letsencrypt</code> 需要 DERP 节点拥有已解析到本机 IP 的域名，且 80 端口可访问（用于 ACME 验证）；若使用自有证书，改为 <code>certmode manual -certdir /path/to/certs</code>。</li>
+<li><code>verify-clients</code> 会要求 DERP 服务器向 Tailscale 控制面验证客户端身份，<strong>该服务器本身也必须已执行 <code>tailscale up</code> 并加入同一 Tailscale 网络</strong>，否则所有客户端连接将被拒绝。</li>
+</ul>
+</blockquote>
+<p>随后在 Tailscale Admin Console 的 <strong>Access controls</strong> 中写入 ACL&#x2F;SSH&#x2F;DERP 配置。</p>
+<h3 id="2-4-3-Admin-Console-Access-controls-配置示例"><a href="#2-4-3-Admin-Console-Access-controls-配置示例" class="headerlink" title="2.4.3 Admin Console Access controls 配置示例"></a>2.4.3 Admin Console Access controls 配置示例</h3><p>本次使用的 Access controls 示例如下（已包含自建 DERP 区域 <code>900</code>）：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;acls&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;action&quot;</span><span class="punctuation">:</span> <span class="string">&quot;accept&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;src&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;*&quot;</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;dst&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;*:*&quot;</span><span class="punctuation">]</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;ssh&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;action&quot;</span><span class="punctuation">:</span> <span class="string">&quot;check&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;src&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;autogroup:member&quot;</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;dst&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;autogroup:self&quot;</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;users&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;autogroup:nonroot&quot;</span><span class="punctuation">,</span> <span class="string">&quot;root&quot;</span><span class="punctuation">]</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;derpMap&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;OmitDefaultRegions&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Regions&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;900&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;RegionID&quot;</span><span class="punctuation">:</span> <span class="number">900</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;RegionCode&quot;</span><span class="punctuation">:</span> <span class="string">&quot;cn-shanghai&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;RegionName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;China Shanghai&quot;</span><span class="punctuation">,</span> <span class="comment">// 可按实际机房命名</span></span><br><span class="line">        <span class="attr">&quot;Nodes&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">          <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;Name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;node-1&quot;</span><span class="punctuation">,</span> <span class="comment">// 节点名称示例</span></span><br><span class="line">            <span class="attr">&quot;RegionID&quot;</span><span class="punctuation">:</span> <span class="number">900</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;HostName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&lt;YOUR_DERP_FQDN&gt;&quot;</span><span class="punctuation">,</span> <span class="comment">// 按实际替换</span></span><br><span class="line">            <span class="attr">&quot;IPv4&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&lt;YOUR_DERP_PUBLIC_IP&gt;&quot;</span><span class="punctuation">,</span> <span class="comment">// 按实际替换</span></span><br><span class="line">            <span class="attr">&quot;DERPPort&quot;</span><span class="punctuation">:</span> <span class="number">443</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;STUNPort&quot;</span><span class="punctuation">:</span> <span class="number">3478</span></span><br><span class="line">          <span class="punctuation">&#125;</span></span><br><span class="line">        <span class="punctuation">]</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>关键字段说明：</strong></p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>当前值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>OmitDefaultRegions</code></td>
+<td><code>false</code></td>
+<td>保留 Tailscale 官方默认 DERP 区域，同时追加自建区域</td>
+</tr>
+<tr>
+<td><code>RegionID</code> &#x2F; <code>RegionCode</code></td>
+<td><code>900</code> &#x2F; <code>cn-shanghai</code></td>
+<td>自定义区域标识，需保证在 tailnet 内唯一</td>
+</tr>
+<tr>
+<td><code>HostName</code> &#x2F; <code>IPv4</code></td>
+<td><code>&lt;已脱敏&gt;</code></td>
+<td>DERP 节点域名与公网 IP，文档中建议脱敏展示，实际配置中填写真实值</td>
+</tr>
+<tr>
+<td><code>DERPPort</code> &#x2F; <code>STUNPort</code></td>
+<td><code>443</code> &#x2F; <code>3478</code></td>
+<td>与服务器实际监听端口一致，否则节点不可用</td>
+</tr>
+</tbody></table>
+<h3 id="2-4-4-验证"><a href="#2-4-4-验证" class="headerlink" title="2.4.4 验证"></a>2.4.4 验证</h3><p>在客户端执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tailscale netcheck</span><br></pre></td></tr></table></figure>
+
+<p>重点关注输出中的 DERP 区域信息，确认节点在回落中继时可命中新增的国内 DERP 区域。</p>
+<hr>
+<h2 id="三、参考资料"><a href="#三、参考资料" class="headerlink" title="三、参考资料"></a>三、参考资料</h2><ul>
+<li>Tailscale 官方文档：<a target="_blank" rel="noopener" href="https://tailscale.com/kb">https://tailscale.com/kb</a></li>
+<li>Tailscale Custom DERP Servers：<a target="_blank" rel="noopener" href="https://tailscale.com/docs/reference/derp-servers/custom-derp-servers">https://tailscale.com/docs/reference/derp-servers/custom-derp-servers</a></li>
+<li>v2ray-agent 项目：<a target="_blank" rel="noopener" href="https://github.com/mack-a/v2ray-agent">https://github.com/mack-a/v2ray-agent</a></li>
+</ul>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="http://github.com/lumosmax7">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E8%83%8C%E6%99%AF%E4%B8%8E%E7%9B%AE%E6%A0%87"><span class="toc-number">1.</span> <span class="toc-text">一、背景与目标</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%B7%B2%E5%AE%8C%E6%88%90%E6%AD%A5%E9%AA%A4"><span class="toc-number">2.</span> <span class="toc-text">二、已完成步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E5%85%A8%E8%8A%82%E7%82%B9%E9%83%A8%E7%BD%B2-Tailscale"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 全节点部署 Tailscale</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-1-%E6%96%B9%E6%A1%88%E9%80%89%E5%9E%8B"><span class="toc-number">2.2.</span> <span class="toc-text">2.1.1 方案选型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-2-%E9%83%A8%E7%BD%B2%E6%AD%A5%E9%AA%A4"><span class="toc-number">2.3.</span> <span class="toc-text">2.1.2 部署步骤</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-3-%E9%AA%8C%E8%AF%81"><span class="toc-number">2.4.</span> <span class="toc-text">2.1.3 验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E5%85%A8%E8%8A%82%E7%82%B9%E9%83%A8%E7%BD%B2-Vision-Reality-%E4%BB%A3%E7%90%86%E8%8A%82%E7%82%B9"><span class="toc-number">2.5.</span> <span class="toc-text">2.2 全节点部署 Vision &amp; Reality 代理节点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-1-%E6%96%B9%E6%A1%88%E9%80%89%E5%9E%8B"><span class="toc-number">2.6.</span> <span class="toc-text">2.2.1 方案选型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-2-%E9%83%A8%E7%BD%B2%E6%AD%A5%E9%AA%A4"><span class="toc-number">2.7.</span> <span class="toc-text">2.2.2 部署步骤</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-3-%E9%AA%8C%E8%AF%81"><span class="toc-number">2.8.</span> <span class="toc-text">2.2.3 验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E9%85%8D%E7%BD%AE-Xray-%E8%B7%AF%E7%94%B1%E8%A7%84%E5%88%99%EF%BC%8C%E6%94%BE%E8%A1%8C-Tailscale-%E6%B5%81%E9%87%8F"><span class="toc-number">2.9.</span> <span class="toc-text">2.3 配置 Xray 路由规则，放行 Tailscale 流量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-1-%E9%97%AE%E9%A2%98%E8%83%8C%E6%99%AF"><span class="toc-number">2.10.</span> <span class="toc-text">2.3.1 问题背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-2-%E8%A7%A3%E5%86%B3%E6%80%9D%E8%B7%AF"><span class="toc-number">2.11.</span> <span class="toc-text">2.3.2 解决思路</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-3-%E5%AE%9E%E6%96%BD%E6%AD%A5%E9%AA%A4"><span class="toc-number">2.12.</span> <span class="toc-text">2.3.3 实施步骤</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-%E4%BD%BF%E7%94%A8%E5%9B%BD%E5%86%85%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%87%AA%E5%BB%BA-DERP-%E4%B8%AD%E7%BB%A7%EF%BC%88%E4%BC%98%E5%8C%96%E8%B7%A8%E5%A2%83%E9%93%BE%E8%B7%AF%E7%A8%B3%E5%AE%9A%E6%80%A7%EF%BC%89"><span class="toc-number">2.13.</span> <span class="toc-text">2.4 使用国内服务器自建 DERP 中继（优化跨境链路稳定性）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-1-%E7%9B%AE%E6%A0%87%E4%B8%8E%E6%80%9D%E8%B7%AF"><span class="toc-number">2.14.</span> <span class="toc-text">2.4.1 目标与思路</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-2-%E5%AE%9E%E6%96%BD%E6%AD%A5%E9%AA%A4%EF%BC%88%E5%8F%82%E8%80%83%E5%AE%98%E6%96%B9-Custom-DERP-%E6%96%87%E6%A1%A3%EF%BC%89"><span class="toc-number">2.15.</span> <span class="toc-text">2.4.2 实施步骤（参考官方 Custom DERP 文档）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-3-Admin-Console-Access-controls-%E9%85%8D%E7%BD%AE%E7%A4%BA%E4%BE%8B"><span class="toc-number">2.16.</span> <span class="toc-text">2.4.3 Admin Console Access controls 配置示例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-4-%E9%AA%8C%E8%AF%81"><span class="toc-number">2.17.</span> <span class="toc-text">2.4.4 验证</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="toc-number">3.</span> <span class="toc-text">三、参考资料</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://lumosmax7.github.io/2026/03/15/2026-03-15-13-25-42/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://lumosmax7.github.io/2026/03/15/2026-03-15-13-25-42/&text=家庭内网改造技术总结报告(一)"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://lumosmax7.github.io/2026/03/15/2026-03-15-13-25-42/&title=家庭内网改造技术总结报告(一)"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lumosmax7.github.io/2026/03/15/2026-03-15-13-25-42/&is_video=false&description=家庭内网改造技术总结报告(一)"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=家庭内网改造技术总结报告(一)&body=Check out this article: https://lumosmax7.github.io/2026/03/15/2026-03-15-13-25-42/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://lumosmax7.github.io/2026/03/15/2026-03-15-13-25-42/&title=家庭内网改造技术总结报告(一)"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://lumosmax7.github.io/2026/03/15/2026-03-15-13-25-42/&title=家庭内网改造技术总结报告(一)"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://lumosmax7.github.io/2026/03/15/2026-03-15-13-25-42/&title=家庭内网改造技术总结报告(一)"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://lumosmax7.github.io/2026/03/15/2026-03-15-13-25-42/&title=家庭内网改造技术总结报告(一)"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://lumosmax7.github.io/2026/03/15/2026-03-15-13-25-42/&name=家庭内网改造技术总结报告(一)&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://lumosmax7.github.io/2026/03/15/2026-03-15-13-25-42/&t=家庭内网改造技术总结报告(一)"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2026
+    Leo
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/lumosmax7">Projects</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="AI 智能体把”谁在访问私有资源”从人和服务扩展到了自主运行的智能体，而传统的 VPN、SSH 隧道、公网暴露都是为人设计的。Cloudflare Mesh 是一张统一的私有网络，让用户、服务器节点、以及跑在 Workers 上的智能体都能通过私有 IP 安全互访，并直接集成进 Cloudflare One 与开发者平台。 它解决什么：三类智能体工作流 客户端正从”人&#x2F;服务”转向”智能体">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Cloudflare Mesh 速览：用户 &#x2F; 节点 &#x2F; 智能体的统一私有网络">
+<meta property="og:url" content="https://lumosmax7.github.io/2026/06/15/2026-06-15-14-28-56/index.html">
+<meta property="og:site_name" content="Lumosmax7">
+<meta property="og:description" content="AI 智能体把”谁在访问私有资源”从人和服务扩展到了自主运行的智能体，而传统的 VPN、SSH 隧道、公网暴露都是为人设计的。Cloudflare Mesh 是一张统一的私有网络，让用户、服务器节点、以及跑在 Workers 上的智能体都能通过私有 IP 安全互访，并直接集成进 Cloudflare One 与开发者平台。 它解决什么：三类智能体工作流 客户端正从”人&#x2F;服务”转向”智能体">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/lumosmax7/PicImage/main/img/mesh-2026-06-15-14-28-56-agent-workflows.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/lumosmax7/PicImage/main/img/mesh-2026-06-15-14-28-56-network.gif">
+<meta property="og:image" content="https://raw.githubusercontent.com/lumosmax7/PicImage/main/img/mesh-2026-06-15-14-28-56-how-it-works.png">
+<meta property="article:published_time" content="2026-06-15T06:28:56.000Z">
+<meta property="article:modified_time" content="2026-06-15T06:31:43.749Z">
+<meta property="article:author" content="Leo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/lumosmax7/PicImage/main/img/mesh-2026-06-15-14-28-56-agent-workflows.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Cloudflare Mesh 速览：用户 / 节点 / 智能体的统一私有网络</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/lumosmax7">Projects</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2026/03/15/2026-03-15-13-25-42/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://lumosmax7.github.io/2026/06/15/2026-06-15-14-28-56/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://lumosmax7.github.io/2026/06/15/2026-06-15-14-28-56/&text=Cloudflare Mesh 速览：用户 / 节点 / 智能体的统一私有网络"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://lumosmax7.github.io/2026/06/15/2026-06-15-14-28-56/&title=Cloudflare Mesh 速览：用户 / 节点 / 智能体的统一私有网络"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lumosmax7.github.io/2026/06/15/2026-06-15-14-28-56/&is_video=false&description=Cloudflare Mesh 速览：用户 / 节点 / 智能体的统一私有网络"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Cloudflare Mesh 速览：用户 / 节点 / 智能体的统一私有网络&body=Check out this article: https://lumosmax7.github.io/2026/06/15/2026-06-15-14-28-56/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://lumosmax7.github.io/2026/06/15/2026-06-15-14-28-56/&title=Cloudflare Mesh 速览：用户 / 节点 / 智能体的统一私有网络"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://lumosmax7.github.io/2026/06/15/2026-06-15-14-28-56/&title=Cloudflare Mesh 速览：用户 / 节点 / 智能体的统一私有网络"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://lumosmax7.github.io/2026/06/15/2026-06-15-14-28-56/&title=Cloudflare Mesh 速览：用户 / 节点 / 智能体的统一私有网络"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://lumosmax7.github.io/2026/06/15/2026-06-15-14-28-56/&title=Cloudflare Mesh 速览：用户 / 节点 / 智能体的统一私有网络"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://lumosmax7.github.io/2026/06/15/2026-06-15-14-28-56/&name=Cloudflare Mesh 速览：用户 / 节点 / 智能体的统一私有网络&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://lumosmax7.github.io/2026/06/15/2026-06-15-14-28-56/&t=Cloudflare Mesh 速览：用户 / 节点 / 智能体的统一私有网络"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%83%E8%A7%A3%E5%86%B3%E4%BB%80%E4%B9%88%EF%BC%9A%E4%B8%89%E7%B1%BB%E6%99%BA%E8%83%BD%E4%BD%93%E5%B7%A5%E4%BD%9C%E6%B5%81"><span class="toc-number">1.</span> <span class="toc-text">它解决什么：三类智能体工作流</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%8C%E4%BB%A5%E5%8F%8A%E5%85%B3%E9%94%AE%E6%94%B9%E5%90%8D"><span class="toc-number">2.</span> <span class="toc-text">是什么，以及关键改名</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%9F%E4%B8%80%E7%A7%81%E6%9C%89%E7%BD%91%E7%BB%9C%E9%95%BF%E4%BB%80%E4%B9%88%E6%A0%B7"><span class="toc-number">3.</span> <span class="toc-text">统一私有网络长什么样</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Mesh-%E8%BF%98%E6%98%AF-Tunnel%EF%BC%9A%E6%80%8E%E4%B9%88%E9%80%89"><span class="toc-number">4.</span> <span class="toc-text">Mesh 还是 Tunnel：怎么选</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%B5%B0-Cloudflare-%E7%BD%91%E7%BB%9C%EF%BC%9ANAT-%E7%A9%BF%E8%B6%8A"><span class="toc-number">5.</span> <span class="toc-text">为什么走 Cloudflare 网络：NAT 穿越</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8E-Workers-%E5%BC%80%E5%8F%91%E8%80%85%E5%B9%B3%E5%8F%B0%E9%9B%86%E6%88%90"><span class="toc-number">6.</span> <span class="toc-text">与 Workers &#x2F; 开发者平台集成</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="toc-number">7.</span> <span class="toc-text">工作原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B7%AF%E7%BA%BF%E5%9B%BE"><span class="toc-number">8.</span> <span class="toc-text">路线图</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%80%E5%A7%8B%E4%BD%BF%E7%94%A8"><span class="toc-number">9.</span> <span class="toc-text">开始使用</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Cloudflare Mesh 速览：用户 / 节点 / 智能体的统一私有网络
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">Leo</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2026-06-15T06:28:56.000Z" class="dt-published" itemprop="datePublished">2026-06-15</time>
+        
+      
+    </div>
+
+
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>AI 智能体把”谁在访问私有资源”从人和服务扩展到了自主运行的智能体，而传统的 VPN、SSH 隧道、公网暴露都是为人设计的。Cloudflare Mesh 是一张统一的私有网络，让用户、服务器节点、以及跑在 Workers 上的智能体都能通过私有 IP 安全互访，并直接集成进 Cloudflare One 与开发者平台。</p>
+<h2 id="它解决什么：三类智能体工作流"><a href="#它解决什么：三类智能体工作流" class="headerlink" title="它解决什么：三类智能体工作流"></a>它解决什么：三类智能体工作流</h2><p><img src="https://raw.githubusercontent.com/lumosmax7/PicImage/main/img/mesh-2026-06-15-14-28-56-agent-workflows.png" alt="面向智能体的私有网络模式"></p>
+<p>客户端正从”人&#x2F;服务”转向”智能体”——提供工具调用的 <strong>MCP（模型上下文协议）服务器</strong>、需要访问私有仓库与数据库的<strong>编码智能体</strong>、跑在家用硬件上的<strong>个人智能体</strong>三类爆发式增长。三个难保护的场景：</p>
+<ol>
+<li><strong>用手机访问家里的个人智能体</strong>：Mac mini 上跑着 OpenClaw，想用手机&#x2F;笔记本访问；直接暴露公网风险很高（智能体握有 Shell、文件系统、网络权限）。</li>
+<li><strong>让编码智能体访问预发布环境</strong>：本地用 Claude Code &#x2F; Cursor &#x2F; Codex，让它查部署状态、连预发布数据库、读内部对象存储——但这些服务都在私有云 VPC 里。</li>
+<li><strong>把已部署的智能体接到私有服务</strong>：用 Workers 上的 Agents SDK，需要调内部 API、查库，且要限定权限范围、可审计、不泄露凭据。</li>
+</ol>
+<h2 id="是什么，以及关键改名"><a href="#是什么，以及关键改名" class="headerlink" title="是什么，以及关键改名"></a>是什么，以及关键改名</h2><ul>
+<li><strong>Mesh 是一个轻量连接器（单一二进制）</strong>：在网络里部署一个，就能适配上面所有访问模式。</li>
+<li>直接集成进现有 <strong>Cloudflare One</strong>：现有 Gateway 策略、Access 规则、设备态势检查自动生效，可逐步开启 Gateway 网络&#x2F;DNS&#x2F;HTTP 策略、Access for Infrastructure（SSH&#x2F;RDP 会话管理）、浏览器隔离、DLP、CASB。</li>
+<li>命名变更（还在用旧概念的话注意）：</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>旧名</th>
+<th>新名</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>WARP Connector</td>
+<td><strong>Cloudflare Mesh 节点</strong></td>
+</tr>
+<tr>
+<td>WARP Client</td>
+<td><strong>Cloudflare One 客户端</strong></td>
+</tr>
+</tbody></table>
+<h2 id="统一私有网络长什么样"><a href="#统一私有网络长什么样" class="headerlink" title="统一私有网络长什么样"></a>统一私有网络长什么样</h2><p><img src="https://raw.githubusercontent.com/lumosmax7/PicImage/main/img/mesh-2026-06-15-14-28-56-network.gif" alt="Mesh 私有 IP 网络"></p>
+<p>连接建立后，设备与节点通过<strong>私有 IP</strong>（如 <code>100.96.0.x</code>）互通，流量经覆盖 <strong>330+ 座城市</strong>的 Cloudflare 网络路由。一套方案覆盖三种接入：</p>
+<ul>
+<li>**Cloudflare One Client (iOS)**：手机安全连到家里跑 OpenClaw 的 Mac mini。</li>
+<li>**Cloudflare One Client (macOS)**：笔记本接入私网，本地编码智能体访问预发布数据库&#x2F;API。</li>
+<li><strong>Mesh 节点（Linux 服务器）</strong>：打通外部云 VPC，访问其私网资源与 MCP。</li>
+</ul>
+<p>所有连接都继承 Cloudflare One 的安全管控（Gateway 策略、设备态势、DNS 过滤）。</p>
+<h2 id="Mesh-还是-Tunnel：怎么选"><a href="#Mesh-还是-Tunnel：怎么选" class="headerlink" title="Mesh 还是 Tunnel：怎么选"></a>Mesh 还是 Tunnel：怎么选</h2><table>
+<thead>
+<tr>
+<th></th>
+<th>Cloudflare Tunnel</th>
+<th>Cloudflare Mesh</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>流量方向</td>
+<td>单向</td>
+<td>双向、多对多</td>
+</tr>
+<tr>
+<td>模型</td>
+<td>边缘把流量代理到<strong>某个</strong>私有服务</td>
+<td>所有设备&#x2F;节点通过私有 IP <strong>互相</strong>访问</td>
+</tr>
+<tr>
+<td>适合</td>
+<td>把单个 Web 服务&#x2F;数据库暴露给边缘</td>
+<td>整张私网互通，无需为每个资源单独建隧道</td>
+</tr>
+</tbody></table>
+<h2 id="为什么走-Cloudflare-网络：NAT-穿越"><a href="#为什么走-Cloudflare-网络：NAT-穿越" class="headerlink" title="为什么走 Cloudflare 网络：NAT 穿越"></a>为什么走 Cloudflare 网络：NAT 穿越</h2><ul>
+<li><strong>难题</strong>：两端都在 NAT 之后时直连常失败，传统方案要回退到中继服务器转发，增加延迟、降低可靠性。</li>
+<li><strong>Cloudflare 做法</strong>：所有 Mesh 流量经全球网络路由——<strong>边缘节点本身就是传输路径，不存在降级回退</strong>，每个数据包都经过 Cloudflare 安全防护。</li>
+</ul>
+<p>核心能力：</p>
+<ul>
+<li><strong>免费</strong>：每个账户含 <strong>50 节点 + 50 用户</strong>。</li>
+<li><strong>全球边缘路由</strong>：330+ 城市、优化骨干网，无”节点数受限的中继”、无降级回退路径。</li>
+<li><strong>原生安全管控</strong>：Gateway 策略、DNS 过滤、DLP、流量检查、设备态势，均可一键开启。</li>
+<li><strong>高可用</strong>：用同一令牌以主备模式起多个连接器、公告相同 IP 路由，故障自动转移。</li>
+</ul>
+<h2 id="与-Workers-开发者平台集成"><a href="#与-Workers-开发者平台集成" class="headerlink" title="与 Workers &#x2F; 开发者平台集成"></a>与 Workers &#x2F; 开发者平台集成</h2><p>扩展了 <strong>Workers VPC</strong>：Workers 和 Durable Objects 通过<strong>单个 binding 的 <code>fetch()</code></strong> 即可访问整张 Mesh 网络（补充了原有对 Cloudflare Tunnel 的支持）。在 <code>wrangler.jsonc</code> 里用保留关键字 <code>cf1:network</code> 绑定到账户下的 Mesh：</p>
+<figure class="highlight jsonc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;vpc_networks&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">  <span class="punctuation">&#123;</span> <span class="attr">&quot;binding&quot;</span><span class="punctuation">:</span> <span class="string">&quot;MESH&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;network_id&quot;</span><span class="punctuation">:</span> <span class="string">&quot;cf1:network&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;remote&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span> <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="punctuation">&#123;</span> <span class="attr">&quot;binding&quot;</span><span class="punctuation">:</span> <span class="string">&quot;AWS_VPC&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;tunnel_id&quot;</span><span class="punctuation">:</span> <span class="string">&quot;350fd307-...&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;remote&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span> <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">]</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> &#123;</span><br><span class="line">  <span class="keyword">async</span> <span class="title function_">fetch</span>(<span class="params"><span class="attr">request</span>: <span class="title class_">Request</span>, <span class="attr">env</span>: <span class="title class_">Env</span>, <span class="attr">ctx</span>: <span class="title class_">ExecutionContext</span></span>) &#123;</span><br><span class="line">    <span class="comment">// 直达 Mesh 上任意内部主机，无需预先注册</span></span><br><span class="line">    <span class="keyword">const</span> apiResponse = <span class="keyword">await</span> env.<span class="property">MESH</span>.<span class="title function_">fetch</span>(<span class="string">&quot;http://10.0.1.50/api/data&quot;</span>);</span><br><span class="line">    <span class="comment">// 通过 tunnel 的私有 DNS 解析内部主机名</span></span><br><span class="line">    <span class="keyword">const</span> dbResponse = <span class="keyword">await</span> env.<span class="property">AWS_VPC</span>.<span class="title function_">fetch</span>(<span class="string">&quot;http://internal-db.corp.local:5432&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Response</span>(<span class="keyword">await</span> apiResponse.<span class="title function_">text</span>());</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>由此可构建安全访问私有数据库 &#x2F; 内部 API &#x2F; MCP 的 Worker，做成跨云的智能体与 MCP，端到端观测整个技术栈。</p>
+<h2 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h2><p><img src="https://raw.githubusercontent.com/lumosmax7/PicImage/main/img/mesh-2026-06-15-14-28-56-how-it-works.png" alt="面向智能体的 Mesh 总架构"></p>
+<p>Mesh、Workers VPC 与 Agents SDK 三者协同：</p>
+<ul>
+<li><strong>Mesh 节点</strong>：服务器、VM、容器，跑无头版 Cloudflare One Client，拿到网状 IP，双向通信。</li>
+<li><strong>设备</strong>：笔记本、手机，跑 Cloudflare One Client，直接通过私有 IP 访问节点（SSH、查库、调 API）；本地编码智能体借此访问私有资源。</li>
+<li><strong>Workers 上的智能体</strong>：通过 Workers VPC 绑定访问私有服务；在 MCP 协调下获得对整网的”有限”访问——<strong>网络管谁能访问，MCP 管能做什么操作</strong>。</li>
+</ul>
+<h2 id="路线图"><a href="#路线图" class="headerlink" title="路线图"></a>路线图</h2><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>时间</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>主机名路由</td>
+<td>今年夏季</td>
+<td>节点为私有主机名（如 <code>wiki.local</code>、<code>api.staging.internal</code>）引流，按名字而非 IP 路由，解决动态 IP &#x2F; 弹性伸缩 &#x2F; 临时容器</td>
+</tr>
+<tr>
+<td>Mesh DNS</td>
+<td>今年下半年</td>
+<td>加入的节点与设备自动获得可路由内部主机名（如 <code>postgres-staging.mesh</code>），可直接 <code>ssh postgres-staging.mesh</code>、<code>curl http://api-prod.mesh:3000/health</code></td>
+</tr>
+<tr>
+<td>身份感知路由</td>
+<td>规划中</td>
+<td>每个节点&#x2F;设备&#x2F;智能体拥有独立身份供策略评估，按”主体 &#x2F; 智能体 &#x2F; 范围”建规则（如允许某人的智能体读取、写入须本人执行）</td>
+</tr>
+<tr>
+<td>容器中的 Mesh</td>
+<td>今年晚些</td>
+<td>提供 Mesh Docker 镜像，可作 sidecar 加入 Docker Compose；也适用 CI&#x2F;CD（如 GitHub Actions 临时加入网络、跑完集成测试即销毁）</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>身份模型三要素：<strong>主体&#x2F;发起人</strong>（授权操作的人）· <strong>智能体</strong>（执行的 AI 系统，带会话号）· <strong>范围</strong>（允许执行的操作）。</p>
+</blockquote>
+<h2 id="开始使用"><a href="#开始使用" class="headerlink" title="开始使用"></a>开始使用</h2><ul>
+<li>仪表板进入 <strong>网络 &gt; Mesh</strong>，<strong>50 节点 + 50 用户免费</strong>。</li>
+<li>构建智能体：<code>npm i agents</code>，按 Workers VPC 快速入门，做带私有后端访问的远程 MCP 服务器。</li>
+<li>已在用 Cloudflare One：Mesh 兼容现有部署，Gateway 策略、设备态势检查、Access 规则自动适用。</li>
+</ul>
+<blockquote>
+<p>本文整理自：<a target="_blank" rel="noopener" href="https://blog.cloudflare.com/zh-cn/mesh/">https://blog.cloudflare.com/zh-cn/mesh/</a></p>
+</blockquote>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="http://github.com/lumosmax7">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%83%E8%A7%A3%E5%86%B3%E4%BB%80%E4%B9%88%EF%BC%9A%E4%B8%89%E7%B1%BB%E6%99%BA%E8%83%BD%E4%BD%93%E5%B7%A5%E4%BD%9C%E6%B5%81"><span class="toc-number">1.</span> <span class="toc-text">它解决什么：三类智能体工作流</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%8C%E4%BB%A5%E5%8F%8A%E5%85%B3%E9%94%AE%E6%94%B9%E5%90%8D"><span class="toc-number">2.</span> <span class="toc-text">是什么，以及关键改名</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%9F%E4%B8%80%E7%A7%81%E6%9C%89%E7%BD%91%E7%BB%9C%E9%95%BF%E4%BB%80%E4%B9%88%E6%A0%B7"><span class="toc-number">3.</span> <span class="toc-text">统一私有网络长什么样</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Mesh-%E8%BF%98%E6%98%AF-Tunnel%EF%BC%9A%E6%80%8E%E4%B9%88%E9%80%89"><span class="toc-number">4.</span> <span class="toc-text">Mesh 还是 Tunnel：怎么选</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%B5%B0-Cloudflare-%E7%BD%91%E7%BB%9C%EF%BC%9ANAT-%E7%A9%BF%E8%B6%8A"><span class="toc-number">5.</span> <span class="toc-text">为什么走 Cloudflare 网络：NAT 穿越</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8E-Workers-%E5%BC%80%E5%8F%91%E8%80%85%E5%B9%B3%E5%8F%B0%E9%9B%86%E6%88%90"><span class="toc-number">6.</span> <span class="toc-text">与 Workers &#x2F; 开发者平台集成</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="toc-number">7.</span> <span class="toc-text">工作原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B7%AF%E7%BA%BF%E5%9B%BE"><span class="toc-number">8.</span> <span class="toc-text">路线图</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%80%E5%A7%8B%E4%BD%BF%E7%94%A8"><span class="toc-number">9.</span> <span class="toc-text">开始使用</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://lumosmax7.github.io/2026/06/15/2026-06-15-14-28-56/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://lumosmax7.github.io/2026/06/15/2026-06-15-14-28-56/&text=Cloudflare Mesh 速览：用户 / 节点 / 智能体的统一私有网络"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://lumosmax7.github.io/2026/06/15/2026-06-15-14-28-56/&title=Cloudflare Mesh 速览：用户 / 节点 / 智能体的统一私有网络"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lumosmax7.github.io/2026/06/15/2026-06-15-14-28-56/&is_video=false&description=Cloudflare Mesh 速览：用户 / 节点 / 智能体的统一私有网络"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Cloudflare Mesh 速览：用户 / 节点 / 智能体的统一私有网络&body=Check out this article: https://lumosmax7.github.io/2026/06/15/2026-06-15-14-28-56/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://lumosmax7.github.io/2026/06/15/2026-06-15-14-28-56/&title=Cloudflare Mesh 速览：用户 / 节点 / 智能体的统一私有网络"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://lumosmax7.github.io/2026/06/15/2026-06-15-14-28-56/&title=Cloudflare Mesh 速览：用户 / 节点 / 智能体的统一私有网络"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://lumosmax7.github.io/2026/06/15/2026-06-15-14-28-56/&title=Cloudflare Mesh 速览：用户 / 节点 / 智能体的统一私有网络"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://lumosmax7.github.io/2026/06/15/2026-06-15-14-28-56/&title=Cloudflare Mesh 速览：用户 / 节点 / 智能体的统一私有网络"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://lumosmax7.github.io/2026/06/15/2026-06-15-14-28-56/&name=Cloudflare Mesh 速览：用户 / 节点 / 智能体的统一私有网络&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://lumosmax7.github.io/2026/06/15/2026-06-15-14-28-56/&t=Cloudflare Mesh 速览：用户 / 节点 / 智能体的统一私有网络"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2026
+    Leo
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/lumosmax7">Projects</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
